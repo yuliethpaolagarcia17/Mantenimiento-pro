@@ -64,7 +64,7 @@ export default function Equipos() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-8 rounded-lg text-center">
             <h2 className="font-bold text-xl mb-4">{qrEquipo.nombre}</h2>
-            <QRCode value={`localhost:3000/equipos/${qrEquipo.id}`} size={200} />
+            <QRCode value={`https://mantenimiento-pro.vercel.app/equipos/${qrEquipo.id}`}
             <p className="text-gray-500 mt-2">{qrEquipo.ubicacion}</p>
             <button onClick={() => setQrEquipo(null)}
               className="mt-4 bg-gray-200 px-4 py-2 rounded">

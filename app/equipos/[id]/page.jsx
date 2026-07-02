@@ -1,8 +1,10 @@
-'use client'
-import { useEffect, useState } from 'react'
+﻿'use client'
+import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
+import Link from 'next/link'
 
 export default function HojaVida({ params }) {
+  const { id } = use(params)
   const [equipo, setEquipo] = useState(null)
   const [cargando, setCargando] = useState(true)
 
@@ -12,7 +14,7 @@ export default function HojaVida({ params }) {
         const { data, error } = await supabase
           .from('equipos')
           .select('*')
-          .eq('id', params.id)
+          .eq('id', id)
           .single()
         if (error) throw error
         setEquipo(data)
@@ -23,7 +25,7 @@ export default function HojaVida({ params }) {
       }
     }
     cargar()
-  }, [params.id])
+  }, [id])
 
   if (cargando) return <p>Cargando equipo...</p>
   if (!equipo) return <p>Equipo no encontrado</p>
@@ -31,6 +33,7 @@ export default function HojaVida({ params }) {
   return (
     <div>
       <h1>{equipo.nombre}</h1>
+      <Link href="/equipos">← Volver a equipos</Link>
     </div>
   )
 }

@@ -31,6 +31,7 @@ export default function RootLayout({
             <a href="/" className="hover:underline">Dashboard</a>
             <a href="/equipos" className="hover:underline">Equipos</a>
             <a href="/mantenimientos" className="hover:underline">Mantenimientos</a>
+            <a href="/historial" className="hover:underline">Historial</a>
           </div>
         </nav>
         {children}

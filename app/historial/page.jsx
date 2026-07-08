@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
@@ -45,7 +45,6 @@ export default function Historial() {
           + Registrar mantenimiento
         </button>
       </div>
-
       {mostrarForm && (
         <div className="bg-white p-6 rounded-lg shadow mb-6">
           <h2 className="font-bold text-lg mb-4">Nuevo registro</h2>
@@ -84,7 +83,6 @@ export default function Historial() {
           </button>
         </div>
       )}
-
       {historial.length === 0 ? (
         <p className="text-gray-500">No hay registros de mantenimiento aún.</p>
       ) : (
@@ -111,7 +109,6 @@ export default function Historial() {
           ))}
         </div>
       )}
-
       <div className="mt-6">
         <a href="/" className="text-blue-700">← Volver al dashboard</a>
       </div>

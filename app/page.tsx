@@ -1,11 +1,13 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
   const [stats, setStats] = useState({
     total: 0, operativos: 0, mantenimiento: 0, fuera: 0
   })
+  const router = useRouter()
 
   useEffect(() => {
     async function cargar() {
@@ -22,10 +24,23 @@ export default function Home() {
     cargar()
   }, [])
 
+  async function cerrarSesion() {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
   return (
     <main className="p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-blue-700 mb-2">MantenPro</h1>
-      <p className="text-gray-500 mb-8">Sistema de Mantenimiento Preventivo</p>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-blue-700">MantenPro</h1>
+          <p className="text-gray-500">Sistema de Mantenimiento Preventivo</p>
+        </div>
+        <button onClick={cerrarSesion}
+          className="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium">
+          Cerrar sesión
+        </button>
+      </div>
 
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-white p-6 rounded-lg shadow text-center">
@@ -46,9 +61,14 @@ export default function Home() {
         </div>
       </div>
 
-      <a href="/equipos" className="block bg-blue-700 text-white text-center py-3 rounded-lg text-lg font-medium">
-        Ver todos los equipos →
-      </a>
+      <div className="flex flex-col gap-3">
+        <a href="/equipos" className="block bg-blue-700 text-white text-center py-3 rounded-lg text-lg font-medium">
+          Ver todos los equipos →
+        </a>
+        <a href="/mantenimientos" className="block bg-white border border-blue-700 text-blue-700 text-center py-3 rounded-lg text-lg font-medium">
+          Plan de mantenimiento →
+        </a>
+      </div>
     </main>
   )
 }

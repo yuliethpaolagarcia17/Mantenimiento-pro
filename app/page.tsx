@@ -1,14 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 
 export default function Home() {
   const [stats, setStats] = useState({
     total: 0, operativos: 0, mantenimiento: 0, fuera: 0
   })
   const [alertas, setAlertas] = useState([])
-  const router = useRouter()
 
   useEffect(() => {
     cargar()
@@ -31,18 +29,16 @@ export default function Home() {
     const hoy = new Date()
     const en7dias = new Date()
     en7dias.setDate(hoy.getDate() + 7)
-
     const { data } = await supabase
       .from('planes_mantenimiento')
       .select('*, equipos(nombre)')
       .lte('proxima_fecha', en7dias.toISOString().split('T')[0])
-
     setAlertas(data || [])
   }
 
   async function cerrarSesion() {
     await supabase.auth.signOut()
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   function colorAlerta(fecha) {

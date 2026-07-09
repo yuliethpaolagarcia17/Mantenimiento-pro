@@ -7,26 +7,60 @@ export default function Home() {
   const [stats, setStats] = useState({
     total: 0, operativos: 0, mantenimiento: 0, fuera: 0
   })
+  const [alertas, setAlertas] = useState([])
   const router = useRouter()
 
   useEffect(() => {
-    async function cargar() {
-      const { data } = await supabase.from('equipos').select('*')
-      if (data) {
-        setStats({
-          total: data.length,
-          operativos: data.filter(e => e.estado === 'operativo').length,
-          mantenimiento: data.filter(e => e.estado === 'mantenimiento').length,
-          fuera: data.filter(e => e.estado === 'fuera de servicio').length
-        })
-      }
-    }
     cargar()
+    cargarAlertas()
   }, [])
+
+  async function cargar() {
+    const { data } = await supabase.from('equipos').select('*')
+    if (data) {
+      setStats({
+        total: data.length,
+        operativos: data.filter(e => e.estado === 'operativo').length,
+        mantenimiento: data.filter(e => e.estado === 'mantenimiento').length,
+        fuera: data.filter(e => e.estado === 'fuera de servicio').length
+      })
+    }
+  }
+
+  async function cargarAlertas() {
+    const hoy = new Date()
+    const en7dias = new Date()
+    en7dias.setDate(hoy.getDate() + 7)
+
+    const { data } = await supabase
+      .from('planes_mantenimiento')
+      .select('*, equipos(nombre)')
+      .lte('proxima_fecha', en7dias.toISOString().split('T')[0])
+
+    setAlertas(data || [])
+  }
 
   async function cerrarSesion() {
     await supabase.auth.signOut()
     router.push('/login')
+  }
+
+  function colorAlerta(fecha) {
+    const hoy = new Date()
+    const f = new Date(fecha)
+    const diff = (f - hoy) / (1000 * 60 * 60 * 24)
+    if (diff < 0) return 'bg-red-100 border-red-400 text-red-700'
+    if (diff <= 7) return 'bg-yellow-100 border-yellow-400 text-yellow-700'
+    return 'bg-green-100 border-green-400 text-green-700'
+  }
+
+  function textoAlerta(fecha) {
+    const hoy = new Date()
+    const f = new Date(fecha)
+    const diff = Math.round((f - hoy) / (1000 * 60 * 60 * 24))
+    if (diff < 0) return '⚠️ Vencido'
+    if (diff === 0) return '🔴 Vence hoy'
+    return `🟡 Vence en ${diff} días`
   }
 
   return (
@@ -41,6 +75,20 @@ export default function Home() {
           Cerrar sesión
         </button>
       </div>
+
+      {alertas.length > 0 && (
+        <div className="mb-6">
+          <h2 className="font-bold text-lg text-red-600 mb-3">🔔 Alertas de mantenimiento</h2>
+          <div className="flex flex-col gap-2">
+            {alertas.map(a => (
+              <div key={a.id} className={`border-l-4 p-3 rounded-lg ${colorAlerta(a.proxima_fecha)}`}>
+                <div className="font-medium">{a.equipos?.nombre} — {a.tipo}</div>
+                <div className="text-sm">{textoAlerta(a.proxima_fecha)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-white p-6 rounded-lg shadow text-center">
@@ -67,6 +115,9 @@ export default function Home() {
         </a>
         <a href="/mantenimientos" className="block bg-white border border-blue-700 text-blue-700 text-center py-3 rounded-lg text-lg font-medium">
           Plan de mantenimiento →
+        </a>
+        <a href="/historial" className="block bg-white border border-blue-700 text-blue-700 text-center py-3 rounded-lg text-lg font-medium">
+          Historial →
         </a>
       </div>
     </main>

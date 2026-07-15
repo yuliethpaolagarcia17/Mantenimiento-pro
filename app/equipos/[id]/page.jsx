@@ -1,16 +1,16 @@
 ﻿'use client'
 import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { QRCodeCanvas } from 'qrcode.react'
+import Link from 'next/link'
 
-export default function HojaVida({ params }) {
+export default function EditarEquipo({ params }) {
   const { id } = use(params)
   const router = useRouter()
-  const [equipo, setEquipo] = useState(null)
+  const [form, setForm] = useState(null)
   const [cargando, setCargando] = useState(true)
-  const [eliminando, setEliminando] = useState(false)
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     async function cargar() {
@@ -21,7 +21,20 @@ export default function HojaVida({ params }) {
           .eq('id', id)
           .single()
         if (error) throw error
-        setEquipo(data)
+        setForm({
+          nombre: data.nombre || '',
+          marca: data.marca || '',
+          modelo: data.modelo || '',
+          serial: data.serial || '',
+          ubicacion: data.ubicacion || '',
+          responsable: data.responsable || '',
+          estado: data.estado || 'operativo',
+          fecha_compra: data.fecha_compra || '',
+          proveedor: data.proveedor || '',
+          garantia_hasta: data.garantia_hasta || '',
+          costo_compra: data.costo_compra ?? '',
+          notas: data.notas || '',
+        })
       } catch (e) {
         console.error('Error cargando equipo:', e)
       } finally {
@@ -31,90 +44,125 @@ export default function HojaVida({ params }) {
     cargar()
   }, [id])
 
-  async function eliminar() {
-    if (!confirm('¿Eliminar este equipo? Esta acción no se puede deshacer.')) return
-    setEliminando(true)
-    const { error } = await supabase.from('equipos').delete().eq('id', id)
-    if (error) {
-      alert('No se pudo eliminar: ' + error.message)
-      setEliminando(false)
+  function actualizar(campo, valor) {
+    setForm({ ...form, [campo]: valor })
+  }
+
+  async function guardar() {
+    if (!form.nombre.trim()) {
+      setError('El nombre del equipo es obligatorio.')
       return
     }
-    router.push('/equipos')
+    setGuardando(true)
+    setError('')
+    try {
+      const datos = { ...form }
+      if (!datos.fecha_compra) datos.fecha_compra = null
+      if (!datos.garantia_hasta) datos.garantia_hasta = null
+      datos.costo_compra = datos.costo_compra ? Number(datos.costo_compra) : null
+      const { error } = await supabase.from('equipos').update(datos).eq('id', id)
+      if (error) throw error
+      router.push(`/equipos/${id}`)
+    } catch (e) {
+      setError('No se pudo guardar: ' + e.message)
+      setGuardando(false)
+    }
   }
 
   if (cargando) return <p className="p-8 text-gray-500">Cargando equipo...</p>
-  if (!equipo) return <p className="p-8 text-gray-500">Equipo no encontrado</p>
-
-  const estadoColor =
-    equipo.estado === 'operativo'
-      ? 'bg-green-100 text-green-700'
-      : equipo.estado === 'mantenimiento'
-      ? 'bg-yellow-100 text-yellow-700'
-      : 'bg-red-100 text-red-700'
-
-  const urlEquipo =
-    typeof window !== 'undefined' ? window.location.href : ''
+  if (!form) return <p className="p-8 text-gray-500">Equipo no encontrado</p>
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-3xl mx-auto">
-        <Link href="/equipos" className="text-blue-600 hover:underline text-sm">
-          ← Volver a equipos
+      <div className="max-w-2xl mx-auto">
+        <Link href={`/equipos/${id}`} className="text-blue-600 hover:underline text-sm">
+          ← Volver a la hoja de vida
         </Link>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-4 p-8">
-          <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">Editar equipo</h1>
+          {error && (
+            <p className="mb-4 text-red-600 text-sm bg-red-50 p-3 rounded">{error}</p>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Campo etiqueta="Nombre" valor={form.nombre} onChange={(v) => actualizar('nombre', v)} />
+            <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} />
+            <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} />
+            <Campo etiqueta="Serial" valor={form.serial} onChange={(v) => actualizar('serial', v)} />
+            <Campo etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)} />
+            <Campo etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{equipo.nombre}</h1>
-              <p className="text-gray-500 mt-1">Hoja de vida del equipo</p>
+              <label className="text-xs uppercase tracking-wide text-gray-400">Estado</label>
+              <select
+                value={form.estado}
+                onChange={(e) => actualizar('estado', e.target.value)}
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="operativo">Operativo</option>
+                <option value="mantenimiento">En mantenimiento</option>
+                <option value="fuera de servicio">Fuera de servicio</option>
+              </select>
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${estadoColor}`}>
-              {equipo.estado}
-            </span>
+            <div>
+              <label className="text-xs uppercase tracking-wide text-gray-400">Fecha de compra</label>
+              <input
+                type="date"
+                value={form.fecha_compra}
+                onChange={(e) => actualizar('fecha_compra', e.target.value)}
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+            <Campo etiqueta="Proveedor" valor={form.proveedor} onChange={(v) => actualizar('proveedor', v)} />
+            <div>
+              <label className="text-xs uppercase tracking-wide text-gray-400">Garantía hasta</label>
+              <input
+                type="date"
+                value={form.garantia_hasta}
+                onChange={(e) => actualizar('garantia_hasta', e.target.value)}
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wide text-gray-400">Costo de compra</label>
+              <input
+                type="number"
+                value={form.costo_compra}
+                onChange={(e) => actualizar('costo_compra', e.target.value)}
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-xs uppercase tracking-wide text-gray-400">Notas</label>
+              <textarea
+                value={form.notas}
+                onChange={(e) => actualizar('notas', e.target.value)}
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+                rows={3}
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <Dato etiqueta="Marca" valor={equipo.marca} />
-            <Dato etiqueta="Modelo" valor={equipo.modelo} />
-            <Dato etiqueta="Serial" valor={equipo.serial} />
-            <Dato etiqueta="Ubicación" valor={equipo.ubicacion} />
-            <Dato etiqueta="Responsable" valor={equipo.responsable} />
-            <Dato etiqueta="Fecha de compra" valor={equipo.fecha_compra || 'No registrada'} />
-          </div>
-          <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col items-center">
-            <p className="text-xs uppercase tracking-wide text-gray-400 mb-3">
-              Código QR del equipo
-            </p>
-            <QRCodeCanvas value={urlEquipo} size={160} />
-            <p className="text-xs text-gray-400 mt-3">
-              Escanea para abrir esta hoja de vida
-            </p>
-          </div>
-          <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center gap-3">
-            <Link
-              href={`/equipos/${id}/editar`}
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Editar equipo
-            </Link>
-            <button
-              onClick={eliminar}
-              disabled={eliminando}
-              className="bg-red-50 text-red-600 px-5 py-2 rounded-lg hover:bg-red-100 disabled:opacity-50"
-            >
-              {eliminando ? 'Eliminando...' : 'Eliminar equipo'}
-            </button>
-          </div>
+          <button
+            onClick={guardar}
+            disabled={guardando}
+            className="mt-6 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {guardando ? 'Guardando...' : 'Guardar cambios'}
+          </button>
         </div>
       </div>
     </div>
   )
 }
 
-function Dato({ etiqueta, valor }) {
+function Campo({ etiqueta, valor, onChange }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-gray-400">{etiqueta}</p>
-      <p className="text-base text-gray-900 mt-1">{valor}</p>
+      <label className="text-xs uppercase tracking-wide text-gray-400">{etiqueta}</label>
+      <input
+        type="text"
+        value={valor}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+      />
     </div>
   )
 }

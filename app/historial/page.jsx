@@ -36,6 +36,12 @@ export default function Historial() {
     cargarHistorial()
   }
 
+  async function eliminar(id) {
+    if (!confirm('¿Eliminar este registro del historial?')) return
+    await supabase.from('historial_mantenimientos').delete().eq('id', id)
+    cargarHistorial()
+  }
+
   return (
     <main className="p-8 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
@@ -103,6 +109,10 @@ export default function Historial() {
                   {h.costo && (
                     <p className="text-green-600 font-medium mt-1">${h.costo}</p>
                   )}
+                  <button onClick={() => eliminar(h.id)}
+                    className="block mt-2 text-red-600 text-sm">
+                    Eliminar
+                  </button>
                 </div>
               </div>
             </div>

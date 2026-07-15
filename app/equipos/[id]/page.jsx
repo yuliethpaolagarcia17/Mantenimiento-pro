@@ -2,12 +2,15 @@
 import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { QRCodeCanvas } from 'qrcode.react'
 
 export default function HojaVida({ params }) {
   const { id } = use(params)
+  const router = useRouter()
   const [equipo, setEquipo] = useState(null)
   const [cargando, setCargando] = useState(true)
+  const [eliminando, setEliminando] = useState(false)
 
   useEffect(() => {
     async function cargar() {
@@ -28,12 +31,26 @@ export default function HojaVida({ params }) {
     cargar()
   }, [id])
 
+  async function eliminar() {
+    if (!confirm('¿Eliminar este equipo? Esta acción no se puede deshacer.')) return
+    setEliminando(true)
+    const { error } = await supabase.from('equipos').delete().eq('id', id)
+    if (error) {
+      alert('No se pudo eliminar: ' + error.message)
+      setEliminando(false)
+      return
+    }
+    router.push('/equipos')
+  }
+
   if (cargando) return <p className="p-8 text-gray-500">Cargando equipo...</p>
   if (!equipo) return <p className="p-8 text-gray-500">Equipo no encontrado</p>
 
   const estadoColor =
     equipo.estado === 'operativo'
       ? 'bg-green-100 text-green-700'
+      : equipo.estado === 'mantenimiento'
+      ? 'bg-yellow-100 text-yellow-700'
       : 'bg-red-100 text-red-700'
 
   const urlEquipo =
@@ -71,6 +88,21 @@ export default function HojaVida({ params }) {
             <p className="text-xs text-gray-400 mt-3">
               Escanea para abrir esta hoja de vida
             </p>
+          </div>
+          <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center gap-3">
+            <Link
+              href={`/equipos/${id}/editar`}
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Editar equipo
+            </Link>
+            <button
+              onClick={eliminar}
+              disabled={eliminando}
+              className="bg-red-50 text-red-600 px-5 py-2 rounded-lg hover:bg-red-100 disabled:opacity-50"
+            >
+              {eliminando ? 'Eliminando...' : 'Eliminar equipo'}
+            </button>
           </div>
         </div>
       </div>

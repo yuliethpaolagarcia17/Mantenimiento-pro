@@ -1,23 +1,44 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function NuevoEquipo() {
+export default function EditarEquipo({ params }) {
+  const { id } = use(params)
   const router = useRouter()
-  const [form, setForm] = useState({
-    nombre: '',
-    marca: '',
-    modelo: '',
-    serial: '',
-    ubicacion: '',
-    responsable: '',
-    estado: 'operativo',
-    fecha_compra: '',
-  })
+  const [form, setForm] = useState(null)
+  const [cargando, setCargando] = useState(true)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function cargar() {
+      try {
+        const { data, error } = await supabase
+          .from('equipos')
+          .select('*')
+          .eq('id', id)
+          .single()
+        if (error) throw error
+        setForm({
+          nombre: data.nombre || '',
+          marca: data.marca || '',
+          modelo: data.modelo || '',
+          serial: data.serial || '',
+          ubicacion: data.ubicacion || '',
+          responsable: data.responsable || '',
+          estado: data.estado || 'operativo',
+          fecha_compra: data.fecha_compra || '',
+        })
+      } catch (e) {
+        console.error('Error cargando equipo:', e)
+      } finally {
+        setCargando(false)
+      }
+    }
+    cargar()
+  }, [id])
 
   function actualizar(campo, valor) {
     setForm({ ...form, [campo]: valor })
@@ -29,23 +50,26 @@ export default function NuevoEquipo() {
     try {
       const datos = { ...form }
       if (!datos.fecha_compra) datos.fecha_compra = null
-      const { error } = await supabase.from('equipos').insert([datos])
+      const { error } = await supabase.from('equipos').update(datos).eq('id', id)
       if (error) throw error
-      router.push('/equipos')
+      router.push(`/equipos/${id}`)
     } catch (e) {
       setError('No se pudo guardar: ' + e.message)
       setGuardando(false)
     }
   }
 
+  if (cargando) return <p className="p-8 text-gray-500">Cargando equipo...</p>
+  if (!form) return <p className="p-8 text-gray-500">Equipo no encontrado</p>
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto">
-        <Link href="/equipos" className="text-blue-600 hover:underline text-sm">
-          ← Volver a equipos
+        <Link href={`/equipos/${id}`} className="text-blue-600 hover:underline text-sm">
+          ← Volver a la hoja de vida
         </Link>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-4 p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Agregar equipo</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">Editar equipo</h1>
           {error && (
             <p className="mb-4 text-red-600 text-sm bg-red-50 p-3 rounded">{error}</p>
           )}
@@ -83,7 +107,7 @@ export default function NuevoEquipo() {
             disabled={guardando}
             className="mt-6 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
-            {guardando ? 'Guardando...' : 'Guardar equipo'}
+            {guardando ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </div>
       </div>

@@ -2,6 +2,15 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
+const DIAS_POR_FRECUENCIA = {
+  diario: 1,
+  semanal: 7,
+  mensual: 30,
+  trimestral: 90,
+  semestral: 180,
+  anual: 365,
+}
+
 export default function Mantenimientos() {
   const [equipos, setEquipos] = useState([])
   const [planes, setPlanes] = useState([])
@@ -19,7 +28,10 @@ export default function Mantenimientos() {
   }
 
   async function cargarPlanes() {
-    const { data } = await supabase.from('planes_mantenimiento').select('*, equipos(nombre)')
+    const { data } = await supabase
+      .from('planes_mantenimiento')
+      .select('*, equipos(nombre)')
+      .order('proxima_fecha', { ascending: true })
     setPlanes(data || [])
   }
 
@@ -27,6 +39,35 @@ export default function Mantenimientos() {
     await supabase.from('planes_mantenimiento').insert([form])
     setForm({ equipo_id: '', tipo: '', frecuencia: 'mensual', proxima_fecha: '', tecnico: '', descripcion: '' })
     setMostrarForm(false)
+    cargarPlanes()
+  }
+
+  async function completar(plan) {
+    const hoy = new Date().toISOString().split('T')[0]
+    await supabase.from('historial_mantenimientos').insert([{
+      equipo_id: plan.equipo_id,
+      tipo: plan.tipo,
+      descripcion: 'Mantenimiento programado completado',
+      tecnico: plan.tecnico || '',
+      fecha: hoy
+    }])
+
+    const dias = DIAS_POR_FRECUENCIA[plan.frecuencia]
+    if (dias) {
+      const siguiente = new Date()
+      siguiente.setDate(siguiente.getDate() + dias)
+      await supabase.from('planes_mantenimiento')
+        .update({ proxima_fecha: siguiente.toISOString().split('T')[0] })
+        .eq('id', plan.id)
+    } else {
+      await supabase.from('planes_mantenimiento').delete().eq('id', plan.id)
+    }
+    cargarPlanes()
+  }
+
+  async function eliminar(id) {
+    if (!confirm('¿Eliminar este plan de mantenimiento?')) return
+    await supabase.from('planes_mantenimiento').delete().eq('id', id)
     cargarPlanes()
   }
 
@@ -83,9 +124,19 @@ export default function Mantenimientos() {
                   <p className="text-gray-500">{p.tipo} · {p.frecuencia}</p>
                   <p className="text-gray-500 text-sm">Técnico: {p.tecnico}</p>
                 </div>
-                <span className={`text-sm px-3 py-1 rounded-full font-medium ${colorFecha(p.proxima_fecha)}`}>
-                  {new Date(p.proxima_fecha).toLocaleDateString('es-CO')}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`text-sm px-3 py-1 rounded-full font-medium ${colorFecha(p.proxima_fecha)}`}>
+                    {new Date(p.proxima_fecha).toLocaleDateString('es-CO')}
+                  </span>
+                  <div className="flex gap-2">
+                    <button onClick={() => completar(p)} className="bg-blue-700 text-white px-3 py-1 rounded-lg text-sm">
+                      Completar
+                    </button>
+                    <button onClick={() => eliminar(p.id)} className="text-red-600 text-sm">
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           ))

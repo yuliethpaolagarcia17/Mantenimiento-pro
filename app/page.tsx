@@ -46,7 +46,11 @@ export default function Home() {
   }
 
   async function cerrarSesion() {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut({ scope: 'local' })
+    } catch (e) {
+      console.error('Error al cerrar sesión:', e)
+    }
     localStorage.clear()
     sessionStorage.clear()
     window.location.replace('/login')

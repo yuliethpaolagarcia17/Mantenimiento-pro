@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 
 export default function Home() {
   const [stats, setStats] = useState({ total: 0, operativos: 0, mantenimiento: 0, fuera: 0 })
-  const [alertas, setAlertas] = useState([])
+  const [alertas, setAlertas] = useState<any[]>([])
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
@@ -23,7 +23,8 @@ export default function Home() {
   }
 
   async function cargar() {
-    const { data } = await supabase.from('equipos').select('*')
+    const { data, error } = await supabase.from('equipos').select('*')
+    if (error) console.error('Error cargando equipos:', error)
     if (data) {
       setStats({
         total: data.length,
@@ -38,29 +39,38 @@ export default function Home() {
     const hoy = new Date()
     const en7dias = new Date()
     en7dias.setDate(hoy.getDate() + 7)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('planes_mantenimiento')
       .select('*, equipos(nombre)')
       .lte('proxima_fecha', en7dias.toISOString().split('T')[0])
+    if (error) console.error('Error cargando alertas:', error)
     setAlertas(data || [])
   }
 
   async function cerrarSesion() {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut({ scope: 'local' })
+    } catch (e) {
+      console.error('Error al cerrar sesión:', e)
+    }
     localStorage.clear()
     sessionStorage.clear()
     window.location.replace('/login')
   }
 
-  function colorAlerta(fecha) {
-    const diff = (new Date(fecha) - new Date()) / (1000 * 60 * 60 * 24)
+  function colorAlerta(fecha: string) {
+    const hoy = new Date()
+    const f = new Date(fecha)
+    const diff = (f.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24)
     if (diff < 0) return 'bg-red-100 border-red-400 text-red-700'
     if (diff <= 7) return 'bg-yellow-100 border-yellow-400 text-yellow-700'
     return 'bg-green-100 border-green-400 text-green-700'
   }
 
-  function textoAlerta(fecha) {
-    const diff = Math.round((new Date(fecha) - new Date()) / (1000 * 60 * 60 * 24))
+  function textoAlerta(fecha: string) {
+    const hoy = new Date()
+    const f = new Date(fecha)
+    const diff = Math.round((f.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
     if (diff < 0) return '⚠️ Vencido'
     if (diff === 0) return '🔴 Vence hoy'
     return `🟡 Vence en ${diff} días`

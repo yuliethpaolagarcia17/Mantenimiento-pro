@@ -1,62 +1,97 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 
-export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+export default function Mantenimientos() {
+  const [equipos, setEquipos] = useState([])
+  const [planes, setPlanes] = useState([])
+  const [form, setForm] = useState({ equipo_id: '', tipo: '', frecuencia: 'mensual', proxima_fecha: '', tecnico: '', descripcion: '' })
+  const [mostrarForm, setMostrarForm] = useState(false)
 
-  async function handleLogin() {
-    setLoading(true)
-    setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError('Correo o contraseña incorrectos')
-    } else {
-      router.push('/')
-    }
-    setLoading(false)
+  useEffect(() => {
+    cargarEquipos()
+    cargarPlanes()
+  }, [])
+
+  async function cargarEquipos() {
+    const { data } = await supabase.from('equipos').select('*')
+    setEquipos(data || [])
+  }
+
+  async function cargarPlanes() {
+    const { data } = await supabase.from('planes_mantenimiento').select('*, equipos(nombre)')
+    setPlanes(data || [])
+  }
+
+  async function guardar() {
+    await supabase.from('planes_mantenimiento').insert([form])
+    setForm({ equipo_id: '', tipo: '', frecuencia: 'mensual', proxima_fecha: '', tecnico: '', descripcion: '' })
+    setMostrarForm(false)
+    cargarPlanes()
+  }
+
+  function colorFecha(fecha) {
+    const diff = (new Date(fecha) - new Date()) / (1000 * 60 * 60 * 24)
+    if (diff < 0) return 'bg-red-100 text-red-700'
+    if (diff < 7) return 'bg-yellow-100 text-yellow-700'
+    return 'bg-green-100 text-green-700'
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
-        <h1 className="text-2xl font-bold text-blue-700 mb-2">MantenPro</h1>
-        <p className="text-gray-500 mb-6">Inicia sesión para continuar</p>
-
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
-            {error}
-          </div>
-        )}
-
-        <div className="flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="border p-3 rounded-lg"
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="border p-3 rounded-lg"
-          />
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="bg-blue-700 text-white py-3 rounded-lg font-medium">
-            {loading ? 'Cargando...' : 'Iniciar sesión'}
-          </button>
-        </div>
+    <main className="p-8 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-blue-700">Plan de mantenimiento</h1>
+        <button onClick={() => setMostrarForm(!mostrarForm)} className="bg-blue-700 text-white px-4 py-2 rounded-lg">
+          + Agregar plan
+        </button>
       </div>
+
+      {mostrarForm && (
+        <div className="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 className="font-bold text-lg mb-4">Nuevo plan</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <select value={form.equipo_id} onChange={e => setForm({...form, equipo_id: e.target.value})} className="border p-2 rounded">
+              <option value="">Seleccionar equipo</option>
+              {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+            </select>
+            <input placeholder="Tipo de mantenimiento" value={form.tipo} onChange={e => setForm({...form, tipo: e.target.value})} className="border p-2 rounded" />
+            <select value={form.frecuencia} onChange={e => setForm({...form, frecuencia: e.target.value})} className="border p-2 rounded">
+              <option value="diario">Diario</option>
+              <option value="semanal">Semanal</option>
+              <option value="mensual">Mensual</option>
+              <option value="trimestral">Trimestral</option>
+              <option value="semestral">Semestral</option>
+              <option value="anual">Anual</option>
+            </select>
+            <input type="date" value={form.proxima_fecha} onChange={e => setForm({...form, proxima_fecha: e.target.value})} className="border p-2 rounded" />
+            <input placeholder="Técnico responsable" value={form.tecnico} onChange={e => setForm({...form, tecnico: e.target.value})} className="border p-2 rounded" />
+            <input placeholder="Descripción" value={form.descripcion} onChange={e => setForm({...form, descripcion: e.target.value})} className="border p-2 rounded" />
+          </div>
+          <button onClick={guardar} className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg">Guardar plan</button>
+        </div>
+      )}
+
+      <div className="grid gap-4">
+        {planes.length === 0 ? (
+          <p className="text-gray-500">No hay planes de mantenimiento aún.</p>
+        ) : (
+          planes.map(p => (
+            <div key={p.id} className="bg-white p-4 rounded-lg shadow">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="font-bold text-lg">{p.equipos?.nombre}</h2>
+                  <p className="text-gray-500">{p.tipo} · {p.frecuencia}</p>
+                  <p className="text-gray-500 text-sm">Técnico: {p.tecnico}</p>
+                </div>
+                <span className={`text-sm px-3 py-1 rounded-full font-medium ${colorFecha(p.proxima_fecha)}`}>
+                  {new Date(p.proxima_fecha).toLocaleDateString('es-CO')}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      <div className="mt-6"><a href="/" className="text-blue-700">← Volver al dashboard</a></div>
     </main>
   )
 }

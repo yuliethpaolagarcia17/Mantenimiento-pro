@@ -3,15 +3,24 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export default function Home() {
-  const [stats, setStats] = useState({
-    total: 0, operativos: 0, mantenimiento: 0, fuera: 0
-  })
+  const [stats, setStats] = useState({ total: 0, operativos: 0, mantenimiento: 0, fuera: 0 })
   const [alertas, setAlertas] = useState([])
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
+    verificarSesion()
+  }, [])
+
+  async function verificarSesion() {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      window.location.replace('/login')
+      return
+    }
     cargar()
     cargarAlertas()
-  }, [])
+    setCargando(false)
+  }
 
   async function cargar() {
     const { data } = await supabase.from('equipos').select('*')
@@ -38,26 +47,26 @@ export default function Home() {
 
   async function cerrarSesion() {
     await supabase.auth.signOut()
-    window.location.href = '/login'
+    localStorage.clear()
+    sessionStorage.clear()
+    window.location.replace('/login')
   }
 
   function colorAlerta(fecha) {
-    const hoy = new Date()
-    const f = new Date(fecha)
-    const diff = (f - hoy) / (1000 * 60 * 60 * 24)
+    const diff = (new Date(fecha) - new Date()) / (1000 * 60 * 60 * 24)
     if (diff < 0) return 'bg-red-100 border-red-400 text-red-700'
     if (diff <= 7) return 'bg-yellow-100 border-yellow-400 text-yellow-700'
     return 'bg-green-100 border-green-400 text-green-700'
   }
 
   function textoAlerta(fecha) {
-    const hoy = new Date()
-    const f = new Date(fecha)
-    const diff = Math.round((f - hoy) / (1000 * 60 * 60 * 24))
+    const diff = Math.round((new Date(fecha) - new Date()) / (1000 * 60 * 60 * 24))
     if (diff < 0) return '⚠️ Vencido'
     if (diff === 0) return '🔴 Vence hoy'
     return `🟡 Vence en ${diff} días`
   }
+
+  if (cargando) return <div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Cargando...</p></div>
 
   return (
     <main className="p-8 bg-gray-50 min-h-screen">
@@ -66,8 +75,7 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-blue-700">MantenPro</h1>
           <p className="text-gray-500">Sistema de Mantenimiento Preventivo</p>
         </div>
-        <button onClick={cerrarSesion}
-          className="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium">
+        <button onClick={cerrarSesion} className="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium">
           Cerrar sesión
         </button>
       </div>
@@ -106,15 +114,9 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <a href="/equipos" className="block bg-blue-700 text-white text-center py-3 rounded-lg text-lg font-medium">
-          Ver todos los equipos →
-        </a>
-        <a href="/mantenimientos" className="block bg-white border border-blue-700 text-blue-700 text-center py-3 rounded-lg text-lg font-medium">
-          Plan de mantenimiento →
-        </a>
-        <a href="/historial" className="block bg-white border border-blue-700 text-blue-700 text-center py-3 rounded-lg text-lg font-medium">
-          Historial →
-        </a>
+        <a href="/equipos" className="block bg-blue-700 text-white text-center py-3 rounded-lg text-lg font-medium">Ver todos los equipos →</a>
+        <a href="/mantenimientos" className="block bg-white border border-blue-700 text-blue-700 text-center py-3 rounded-lg text-lg font-medium">Plan de mantenimiento →</a>
+        <a href="/historial" className="block bg-white border border-blue-700 text-blue-700 text-center py-3 rounded-lg text-lg font-medium">Historial →</a>
       </div>
     </main>
   )

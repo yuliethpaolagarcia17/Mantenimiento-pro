@@ -10,6 +10,8 @@ export default function Historial() {
     tecnico: '', fecha: '', costo: ''
   })
   const [mostrarForm, setMostrarForm] = useState(false)
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     cargarEquipos()
@@ -17,28 +19,46 @@ export default function Historial() {
   }, [])
 
   async function cargarEquipos() {
-    const { data } = await supabase.from('equipos').select('*')
+    const { data, error } = await supabase.from('equipos').select('*')
+    if (error) console.error('Error cargando equipos:', error)
     setEquipos(data || [])
   }
 
   async function cargarHistorial() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('historial_mantenimientos')
       .select('*, equipos(nombre)')
       .order('fecha', { ascending: false })
+    if (error) console.error('Error cargando historial:', error)
     setHistorial(data || [])
   }
 
   async function guardar() {
-    await supabase.from('historial_mantenimientos').insert([form])
+    if (!form.equipo_id || !form.tipo || !form.fecha) {
+      setError('Selecciona un equipo, el tipo y la fecha antes de guardar.')
+      return
+    }
+    setGuardando(true)
+    setError('')
+    const { error } = await supabase.from('historial_mantenimientos').insert([form])
+    if (error) {
+      setError('No se pudo guardar: ' + error.message)
+      setGuardando(false)
+      return
+    }
     setForm({ equipo_id: '', tipo: '', descripcion: '', tecnico: '', fecha: '', costo: '' })
     setMostrarForm(false)
+    setGuardando(false)
     cargarHistorial()
   }
 
   async function eliminar(id) {
     if (!confirm('¿Eliminar este registro del historial?')) return
-    await supabase.from('historial_mantenimientos').delete().eq('id', id)
+    const { error } = await supabase.from('historial_mantenimientos').delete().eq('id', id)
+    if (error) {
+      alert('No se pudo eliminar: ' + error.message)
+      return
+    }
     cargarHistorial()
   }
 
@@ -54,6 +74,9 @@ export default function Historial() {
       {mostrarForm && (
         <div className="bg-white p-6 rounded-lg shadow mb-6">
           <h2 className="font-bold text-lg mb-4">Nuevo registro</h2>
+          {error && (
+            <p className="mb-4 text-red-600 text-sm bg-red-50 p-3 rounded">{error}</p>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <select value={form.equipo_id}
               onChange={e => setForm({...form, equipo_id: e.target.value})}
@@ -84,8 +107,9 @@ export default function Historial() {
               className="border p-2 rounded" />
           </div>
           <button onClick={guardar}
-            className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg">
-            Guardar registro
+            disabled={guardando}
+            className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg disabled:opacity-50">
+            {guardando ? 'Guardando...' : 'Guardar registro'}
           </button>
         </div>
       )}

@@ -45,6 +45,10 @@ export default function EditarEquipo({ params }) {
   }
 
   async function guardar() {
+    if (!form.nombre.trim()) {
+      setError('El nombre del equipo es obligatorio.')
+      return
+    }
     setGuardando(true)
     setError('')
     try {

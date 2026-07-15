@@ -23,7 +23,8 @@ export default function Home() {
   }
 
   async function cargar() {
-    const { data } = await supabase.from('equipos').select('*')
+    const { data, error } = await supabase.from('equipos').select('*')
+    if (error) console.error('Error cargando equipos:', error)
     if (data) {
       setStats({
         total: data.length,
@@ -38,10 +39,11 @@ export default function Home() {
     const hoy = new Date()
     const en7dias = new Date()
     en7dias.setDate(hoy.getDate() + 7)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('planes_mantenimiento')
       .select('*, equipos(nombre)')
       .lte('proxima_fecha', en7dias.toISOString().split('T')[0])
+    if (error) console.error('Error cargando alertas:', error)
     setAlertas(data || [])
   }
 

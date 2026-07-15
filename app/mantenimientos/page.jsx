@@ -16,6 +16,8 @@ export default function Mantenimientos() {
   const [planes, setPlanes] = useState([])
   const [form, setForm] = useState({ equipo_id: '', tipo: '', frecuencia: 'mensual', proxima_fecha: '', tecnico: '', descripcion: '' })
   const [mostrarForm, setMostrarForm] = useState(false)
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     cargarEquipos()
@@ -23,51 +25,81 @@ export default function Mantenimientos() {
   }, [])
 
   async function cargarEquipos() {
-    const { data } = await supabase.from('equipos').select('*')
+    const { data, error } = await supabase.from('equipos').select('*')
+    if (error) console.error('Error cargando equipos:', error)
     setEquipos(data || [])
   }
 
   async function cargarPlanes() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('planes_mantenimiento')
       .select('*, equipos(nombre)')
       .order('proxima_fecha', { ascending: true })
+    if (error) console.error('Error cargando planes:', error)
     setPlanes(data || [])
   }
 
   async function guardar() {
-    await supabase.from('planes_mantenimiento').insert([form])
+    if (!form.equipo_id || !form.tipo || !form.proxima_fecha) {
+      setError('Selecciona un equipo, el tipo y la próxima fecha antes de guardar.')
+      return
+    }
+    setGuardando(true)
+    setError('')
+    const { error } = await supabase.from('planes_mantenimiento').insert([form])
+    if (error) {
+      setError('No se pudo guardar: ' + error.message)
+      setGuardando(false)
+      return
+    }
     setForm({ equipo_id: '', tipo: '', frecuencia: 'mensual', proxima_fecha: '', tecnico: '', descripcion: '' })
     setMostrarForm(false)
+    setGuardando(false)
     cargarPlanes()
   }
 
   async function completar(plan) {
     const hoy = new Date().toISOString().split('T')[0]
-    await supabase.from('historial_mantenimientos').insert([{
+    const { error: errorHistorial } = await supabase.from('historial_mantenimientos').insert([{
       equipo_id: plan.equipo_id,
       tipo: plan.tipo,
       descripcion: 'Mantenimiento programado completado',
       tecnico: plan.tecnico || '',
       fecha: hoy
     }])
+    if (errorHistorial) {
+      alert('No se pudo registrar el mantenimiento: ' + errorHistorial.message)
+      return
+    }
 
     const dias = DIAS_POR_FRECUENCIA[plan.frecuencia]
     if (dias) {
       const siguiente = new Date()
       siguiente.setDate(siguiente.getDate() + dias)
-      await supabase.from('planes_mantenimiento')
+      const { error } = await supabase.from('planes_mantenimiento')
         .update({ proxima_fecha: siguiente.toISOString().split('T')[0] })
         .eq('id', plan.id)
+      if (error) {
+        alert('El mantenimiento quedó registrado, pero no se pudo reprogramar el plan: ' + error.message)
+        return
+      }
     } else {
-      await supabase.from('planes_mantenimiento').delete().eq('id', plan.id)
+      const { error } = await supabase.from('planes_mantenimiento').delete().eq('id', plan.id)
+      if (error) {
+        alert('El mantenimiento quedó registrado, pero no se pudo cerrar el plan: ' + error.message)
+        return
+      }
     }
     cargarPlanes()
   }
 
   async function eliminar(id) {
     if (!confirm('¿Eliminar este plan de mantenimiento?')) return
-    await supabase.from('planes_mantenimiento').delete().eq('id', id)
+    const { error } = await supabase.from('planes_mantenimiento').delete().eq('id', id)
+    if (error) {
+      alert('No se pudo eliminar: ' + error.message)
+      return
+    }
     cargarPlanes()
   }
 
@@ -89,7 +121,10 @@ export default function Mantenimientos() {
 
       {mostrarForm && (
         <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h2 className="font-bold text-lg mb-4">Nuevo plan</h2>
+          <h2 className="font-bold text-lg mb-4">Nuevo plan de mantenimiento</h2>
+          {error && (
+            <p className="mb-4 text-red-600 text-sm bg-red-50 p-3 rounded">{error}</p>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <select value={form.equipo_id} onChange={e => setForm({...form, equipo_id: e.target.value})} className="border p-2 rounded">
               <option value="">Seleccionar equipo</option>
@@ -108,7 +143,11 @@ export default function Mantenimientos() {
             <input placeholder="Técnico responsable" value={form.tecnico} onChange={e => setForm({...form, tecnico: e.target.value})} className="border p-2 rounded" />
             <input placeholder="Descripción" value={form.descripcion} onChange={e => setForm({...form, descripcion: e.target.value})} className="border p-2 rounded" />
           </div>
-          <button onClick={guardar} className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg">Guardar plan</button>
+          <button onClick={guardar}
+            disabled={guardando}
+            className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg disabled:opacity-50">
+            {guardando ? 'Guardando...' : 'Guardar plan'}
+          </button>
         </div>
       )}
 

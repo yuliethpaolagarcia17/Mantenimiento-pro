@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { QRCodeCanvas } from 'qrcode.react'
+import { IconWrench } from '../../components/Icons'
 
 export default function HojaVida({ params }) {
   const { id } = use(params)
@@ -64,6 +65,13 @@ export default function HojaVida({ params }) {
       ? 'bg-amber-50 text-amber-700'
       : 'bg-red-50 text-red-700'
 
+  const estadoDot =
+    equipo.estado === 'operativo'
+      ? 'bg-emerald-500'
+      : equipo.estado === 'mantenimiento'
+      ? 'bg-amber-500'
+      : 'bg-red-500'
+
   const urlEquipo =
     typeof window !== 'undefined' ? window.location.href : ''
 
@@ -79,7 +87,8 @@ export default function HojaVida({ params }) {
             <h1 className="text-2xl font-semibold text-gray-900">{equipo.nombre}</h1>
             <p className="text-gray-500 mt-1 text-sm">Hoja de vida del equipo</p>
           </div>
-          <span className={`shrink-0 px-3 py-1 rounded-full text-sm font-medium ${estadoColor}`}>
+          <span className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${estadoColor}`}>
+            <span className={`h-2 w-2 rounded-full ${estadoDot}`} />
             {equipo.estado}
           </span>
         </div>
@@ -130,16 +139,22 @@ export default function HojaVida({ params }) {
           )}
         </div>
 
-        <div className="mt-7 pt-6 border-t border-gray-100 flex flex-col items-center">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400 mb-3">
-            Código QR del equipo
-          </p>
-          <div className="p-3 bg-white border border-gray-200 rounded-xl">
-            <QRCodeCanvas value={urlEquipo} size={150} />
+        <div className="mt-7 pt-6 border-t border-gray-100">
+          <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-5 flex flex-col sm:flex-row items-center gap-5">
+            <div className="p-3 bg-white border border-gray-200 rounded-xl shrink-0">
+              <QRCodeCanvas value={urlEquipo} size={130} />
+            </div>
+            <div className="text-center sm:text-left">
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 uppercase tracking-wide mb-1.5">
+                <IconWrench className="h-3.5 w-3.5" />
+                Acceso instantáneo con código QR
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Cada equipo tiene un código QR único. Al escanearlo desde el celular, el técnico
+                accede de inmediato a esta hoja de vida — sin buscar papeles ni carpetas.
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-gray-400 mt-3">
-            Escanea para abrir esta hoja de vida
-          </p>
         </div>
 
         <div className="mt-7 pt-6 border-t border-gray-100 flex justify-center gap-3">

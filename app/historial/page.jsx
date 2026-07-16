@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { IconPlus, IconInbox, IconClock } from '../components/Icons'
 
 export default function Historial() {
   const [equipos, setEquipos] = useState([])
@@ -70,8 +71,9 @@ export default function Historial() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold text-gray-900">Historial de mantenimientos</h1>
         <button onClick={() => setMostrarForm(!mostrarForm)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-          + Registrar mantenimiento
+          className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-indigo-200">
+          <IconPlus className="h-4 w-4" />
+          Registrar mantenimiento
         </button>
       </div>
 
@@ -133,19 +135,27 @@ export default function Historial() {
       )}
 
       {historial.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center">
+        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center flex flex-col items-center">
+          <span className="h-12 w-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-3">
+            <IconInbox className="h-6 w-6" />
+          </span>
           <p className="text-gray-500 text-sm">No hay registros de mantenimiento aún.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {historial.map(h => (
-            <div key={h.id} className="bg-white rounded-xl border border-gray-200 p-5">
+            <div key={h.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
               <div className="flex justify-between items-start gap-4">
-                <div className="min-w-0">
-                  <h2 className="font-medium text-gray-900">{h.equipos?.nombre}</h2>
-                  <p className="text-gray-600 text-sm mt-0.5">{h.tipo}</p>
-                  {h.tecnico && <p className="text-gray-500 text-sm">Técnico: {h.tecnico}</p>}
-                  {h.descripcion && <p className="text-gray-500 text-sm">{h.descripcion}</p>}
+                <div className="flex items-start gap-3 min-w-0">
+                  <span className="h-9 w-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <IconClock className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <h2 className="font-medium text-gray-900">{h.equipos?.nombre}</h2>
+                    <p className="text-gray-600 text-sm mt-0.5">{h.tipo}</p>
+                    {h.tecnico && <p className="text-gray-500 text-sm">Técnico: {h.tecnico}</p>}
+                    {h.descripcion && <p className="text-gray-500 text-sm">{h.descripcion}</p>}
+                  </div>
                 </div>
                 <div className="text-right shrink-0">
                   <span className="text-xs font-medium bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">

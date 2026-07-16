@@ -13,9 +13,10 @@
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(180deg, #eef2ff 0%, var(--background) 380px, var(--background) 100%);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }

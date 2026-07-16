@@ -1,6 +1,7 @@
-﻿'use client'
+'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { IconWrench } from '../components/Icons'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -37,17 +38,17 @@ export default function Login() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <main className="min-h-screen bg-gradient-to-b from-indigo-50 via-slate-50 to-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="h-12 w-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl mb-4 shadow-sm shadow-indigo-200">
-            M
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
+            <IconWrench className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-semibold text-gray-900">MantenPro</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">MantenPro</h1>
           <p className="text-gray-500 mt-1 text-sm">Sistema de mantenimiento preventivo</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-200 p-8">
           {error && (
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-5 text-sm">
               {error}

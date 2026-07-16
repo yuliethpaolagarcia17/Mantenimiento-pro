@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { IconPlus, IconInbox, IconWrench } from '../components/Icons'
 
 const DIAS_POR_FRECUENCIA = {
   diario: 1,
@@ -117,8 +118,9 @@ export default function Mantenimientos() {
     <main className="max-w-3xl mx-auto p-4 sm:p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold text-gray-900">Plan de mantenimiento</h1>
-        <button onClick={() => setMostrarForm(!mostrarForm)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-          + Agregar plan
+        <button onClick={() => setMostrarForm(!mostrarForm)} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-indigo-200">
+          <IconPlus className="h-4 w-4" />
+          Agregar plan
         </button>
       </div>
 
@@ -173,18 +175,29 @@ export default function Mantenimientos() {
       )}
 
       {planes.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center">
+        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center flex flex-col items-center">
+          <span className="h-12 w-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-3">
+            <IconInbox className="h-6 w-6" />
+          </span>
           <p className="text-gray-500 text-sm">No hay planes de mantenimiento aún.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {planes.map(p => (
-            <div key={p.id} className="bg-white rounded-xl border border-gray-200 p-5">
+            <div key={p.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
               <div className="flex justify-between items-center gap-4">
-                <div className="min-w-0">
-                  <h2 className="font-medium text-gray-900">{p.equipos?.nombre}</h2>
-                  <p className="text-gray-500 text-sm mt-0.5">{p.tipo} · {p.frecuencia}</p>
-                  {p.tecnico && <p className="text-gray-500 text-sm">Técnico: {p.tecnico}</p>}
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="h-9 w-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                    <IconWrench className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <h2 className="font-medium text-gray-900">{p.equipos?.nombre}</h2>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                      <span className="text-gray-500 text-sm">{p.tipo}</span>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-500 font-medium">{p.frecuencia}</span>
+                    </div>
+                    {p.tecnico && <p className="text-gray-500 text-sm mt-1">Técnico: {p.tecnico}</p>}
+                  </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${colorFecha(p.proxima_fecha)}`}>

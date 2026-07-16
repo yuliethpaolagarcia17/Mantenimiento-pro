@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -30,6 +30,10 @@ export default function EditarEquipo({ params }) {
           responsable: data.responsable || '',
           estado: data.estado || 'operativo',
           fecha_compra: data.fecha_compra || '',
+          proveedor: data.proveedor || '',
+          garantia_hasta: data.garantia_hasta || '',
+          costo_compra: data.costo_compra ?? '',
+          notas: data.notas || '',
         })
       } catch (e) {
         console.error('Error cargando equipo:', e)
@@ -54,6 +58,8 @@ export default function EditarEquipo({ params }) {
     try {
       const datos = { ...form }
       if (!datos.fecha_compra) datos.fecha_compra = null
+      if (!datos.garantia_hasta) datos.garantia_hasta = null
+      datos.costo_compra = datos.costo_compra ? Number(datos.costo_compra) : null
       const { error } = await supabase.from('equipos').update(datos).eq('id', id)
       if (error) throw error
       router.push(`/equipos/${id}`)
@@ -103,6 +109,34 @@ export default function EditarEquipo({ params }) {
                 value={form.fecha_compra}
                 onChange={(e) => actualizar('fecha_compra', e.target.value)}
                 className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+            <Campo etiqueta="Proveedor" valor={form.proveedor} onChange={(v) => actualizar('proveedor', v)} />
+            <div>
+              <label className="text-xs uppercase tracking-wide text-gray-400">Garantía hasta</label>
+              <input
+                type="date"
+                value={form.garantia_hasta}
+                onChange={(e) => actualizar('garantia_hasta', e.target.value)}
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wide text-gray-400">Costo de compra</label>
+              <input
+                type="number"
+                value={form.costo_compra}
+                onChange={(e) => actualizar('costo_compra', e.target.value)}
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-xs uppercase tracking-wide text-gray-400">Notas</label>
+              <textarea
+                value={form.notas}
+                onChange={(e) => actualizar('notas', e.target.value)}
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
+                rows={3}
               />
             </div>
           </div>

@@ -1,16 +1,17 @@
 ﻿'use client'
 import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { QRCodeCanvas } from 'qrcode.react'
 
-export default function EditarEquipo({ params }) {
+export default function HojaVida({ params }) {
   const { id } = use(params)
   const router = useRouter()
-  const [form, setForm] = useState(null)
+  const [equipo, setEquipo] = useState(null)
+  const [historial, setHistorial] = useState([])
   const [cargando, setCargando] = useState(true)
-  const [guardando, setGuardando] = useState(false)
-  const [error, setError] = useState('')
+  const [eliminando, setEliminando] = useState(false)
 
   useEffect(() => {
     async function cargar() {
@@ -21,148 +22,145 @@ export default function EditarEquipo({ params }) {
           .eq('id', id)
           .single()
         if (error) throw error
-        setForm({
-          nombre: data.nombre || '',
-          marca: data.marca || '',
-          modelo: data.modelo || '',
-          serial: data.serial || '',
-          ubicacion: data.ubicacion || '',
-          responsable: data.responsable || '',
-          estado: data.estado || 'operativo',
-          fecha_compra: data.fecha_compra || '',
-          proveedor: data.proveedor || '',
-          garantia_hasta: data.garantia_hasta || '',
-          costo_compra: data.costo_compra ?? '',
-          notas: data.notas || '',
-        })
+        setEquipo(data)
       } catch (e) {
         console.error('Error cargando equipo:', e)
       } finally {
         setCargando(false)
       }
     }
+    async function cargarHistorial() {
+      const { data, error } = await supabase
+        .from('historial_mantenimientos')
+        .select('*')
+        .eq('equipo_id', id)
+        .order('fecha', { ascending: false })
+      if (error) console.error('Error cargando historial:', error)
+      setHistorial(data || [])
+    }
     cargar()
+    cargarHistorial()
   }, [id])
 
-  function actualizar(campo, valor) {
-    setForm({ ...form, [campo]: valor })
-  }
-
-  async function guardar() {
-    if (!form.nombre.trim()) {
-      setError('El nombre del equipo es obligatorio.')
+  async function eliminar() {
+    if (!confirm('¿Eliminar este equipo? Esta acción no se puede deshacer.')) return
+    setEliminando(true)
+    const { error } = await supabase.from('equipos').delete().eq('id', id)
+    if (error) {
+      alert('No se pudo eliminar: ' + error.message)
+      setEliminando(false)
       return
     }
-    setGuardando(true)
-    setError('')
-    try {
-      const datos = { ...form }
-      if (!datos.fecha_compra) datos.fecha_compra = null
-      if (!datos.garantia_hasta) datos.garantia_hasta = null
-      datos.costo_compra = datos.costo_compra ? Number(datos.costo_compra) : null
-      const { error } = await supabase.from('equipos').update(datos).eq('id', id)
-      if (error) throw error
-      router.push(`/equipos/${id}`)
-    } catch (e) {
-      setError('No se pudo guardar: ' + e.message)
-      setGuardando(false)
-    }
+    router.push('/equipos')
   }
 
   if (cargando) return <p className="p-8 text-gray-500">Cargando equipo...</p>
-  if (!form) return <p className="p-8 text-gray-500">Equipo no encontrado</p>
+  if (!equipo) return <p className="p-8 text-gray-500">Equipo no encontrado</p>
+
+  const estadoColor =
+    equipo.estado === 'operativo'
+      ? 'bg-green-100 text-green-700'
+      : equipo.estado === 'mantenimiento'
+      ? 'bg-yellow-100 text-yellow-700'
+      : 'bg-red-100 text-red-700'
+
+  const urlEquipo =
+    typeof window !== 'undefined' ? window.location.href : ''
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-2xl mx-auto">
-        <Link href={`/equipos/${id}`} className="text-blue-600 hover:underline text-sm">
-          ← Volver a la hoja de vida
+      <div className="max-w-3xl mx-auto">
+        <Link href="/equipos" className="text-blue-600 hover:underline text-sm">
+          ← Volver a equipos
         </Link>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-4 p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Editar equipo</h1>
-          {error && (
-            <p className="mb-4 text-red-600 text-sm bg-red-50 p-3 rounded">{error}</p>
-          )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Campo etiqueta="Nombre" valor={form.nombre} onChange={(v) => actualizar('nombre', v)} />
-            <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} />
-            <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} />
-            <Campo etiqueta="Serial" valor={form.serial} onChange={(v) => actualizar('serial', v)} />
-            <Campo etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)} />
-            <Campo etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} />
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <label className="text-xs uppercase tracking-wide text-gray-400">Estado</label>
-              <select
-                value={form.estado}
-                onChange={(e) => actualizar('estado', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="operativo">Operativo</option>
-                <option value="mantenimiento">En mantenimiento</option>
-                <option value="fuera de servicio">Fuera de servicio</option>
-              </select>
+              <h1 className="text-3xl font-bold text-gray-900">{equipo.nombre}</h1>
+              <p className="text-gray-500 mt-1">Hoja de vida del equipo</p>
             </div>
-            <div>
-              <label className="text-xs uppercase tracking-wide text-gray-400">Fecha de compra</label>
-              <input
-                type="date"
-                value={form.fecha_compra}
-                onChange={(e) => actualizar('fecha_compra', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-              />
-            </div>
-            <Campo etiqueta="Proveedor" valor={form.proveedor} onChange={(v) => actualizar('proveedor', v)} />
-            <div>
-              <label className="text-xs uppercase tracking-wide text-gray-400">Garantía hasta</label>
-              <input
-                type="date"
-                value={form.garantia_hasta}
-                onChange={(e) => actualizar('garantia_hasta', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="text-xs uppercase tracking-wide text-gray-400">Costo de compra</label>
-              <input
-                type="number"
-                value={form.costo_compra}
-                onChange={(e) => actualizar('costo_compra', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="text-xs uppercase tracking-wide text-gray-400">Notas</label>
-              <textarea
-                value={form.notas}
-                onChange={(e) => actualizar('notas', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-                rows={3}
-              />
-            </div>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${estadoColor}`}>
+              {equipo.estado}
+            </span>
           </div>
-          <button
-            onClick={guardar}
-            disabled={guardando}
-            className="mt-6 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            {guardando ? 'Guardando...' : 'Guardar cambios'}
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Dato etiqueta="Marca" valor={equipo.marca} />
+            <Dato etiqueta="Modelo" valor={equipo.modelo} />
+            <Dato etiqueta="Serial" valor={equipo.serial} />
+            <Dato etiqueta="Ubicación" valor={equipo.ubicacion} />
+            <Dato etiqueta="Responsable" valor={equipo.responsable} />
+            <Dato etiqueta="Fecha de compra" valor={equipo.fecha_compra || 'No registrada'} />
+            <Dato etiqueta="Proveedor" valor={equipo.proveedor || 'No registrado'} />
+            <Dato etiqueta="Garantía hasta" valor={equipo.garantia_hasta || 'No registrada'} />
+            <Dato etiqueta="Costo de compra" valor={equipo.costo_compra ? `$${equipo.costo_compra}` : 'No registrado'} />
+          </div>
+          {equipo.notas && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">Notas</p>
+              <p className="text-base text-gray-900 whitespace-pre-wrap">{equipo.notas}</p>
+            </div>
+          )}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <p className="text-xs uppercase tracking-wide text-gray-400 mb-3">
+              Historial de mantenimientos ({historial.length})
+            </p>
+            {historial.length === 0 ? (
+              <p className="text-gray-500 text-sm">Este equipo no tiene mantenimientos registrados.</p>
+            ) : (
+              <div className="space-y-3">
+                {historial.map(h => (
+                  <div key={h.id} className="bg-gray-50 rounded-lg p-4 flex justify-between items-start">
+                    <div>
+                      <p className="font-medium text-gray-900">{h.tipo}</p>
+                      {h.tecnico && <p className="text-sm text-gray-500">Técnico: {h.tecnico}</p>}
+                      {h.descripcion && <p className="text-sm text-gray-500">{h.descripcion}</p>}
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                        {new Date(h.fecha).toLocaleDateString('es-CO')}
+                      </span>
+                      {h.costo && <p className="text-green-600 font-medium mt-1 text-sm">${h.costo}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col items-center">
+            <p className="text-xs uppercase tracking-wide text-gray-400 mb-3">
+              Código QR del equipo
+            </p>
+            <QRCodeCanvas value={urlEquipo} size={160} />
+            <p className="text-xs text-gray-400 mt-3">
+              Escanea para abrir esta hoja de vida
+            </p>
+          </div>
+          <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center gap-3">
+            <Link
+              href={`/equipos/${id}/editar`}
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Editar equipo
+            </Link>
+            <button
+              onClick={eliminar}
+              disabled={eliminando}
+              className="bg-red-50 text-red-600 px-5 py-2 rounded-lg hover:bg-red-100 disabled:opacity-50"
+            >
+              {eliminando ? 'Eliminando...' : 'Eliminar equipo'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-function Campo({ etiqueta, valor, onChange }) {
+function Dato({ etiqueta, valor }) {
   return (
     <div>
-      <label className="text-xs uppercase tracking-wide text-gray-400">{etiqueta}</label>
-      <input
-        type="text"
-        value={valor}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-      />
+      <p className="text-xs uppercase tracking-wide text-gray-400">{etiqueta}</p>
+      <p className="text-base text-gray-900 mt-1">{valor}</p>
     </div>
   )
 }

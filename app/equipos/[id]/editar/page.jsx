@@ -69,100 +69,74 @@ export default function EditarEquipo({ params }) {
     }
   }
 
-  if (cargando) return <p className="p-8 text-gray-500">Cargando equipo...</p>
-  if (!form) return <p className="p-8 text-gray-500">Equipo no encontrado</p>
+  if (cargando) return <p className="p-8 text-gray-400 text-sm">Cargando equipo...</p>
+  if (!form) return <p className="p-8 text-gray-400 text-sm">Equipo no encontrado</p>
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-2xl mx-auto">
-        <Link href={`/equipos/${id}`} className="text-blue-600 hover:underline text-sm">
-          ← Volver a la hoja de vida
-        </Link>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-4 p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Editar equipo</h1>
-          {error && (
-            <p className="mb-4 text-red-600 text-sm bg-red-50 p-3 rounded">{error}</p>
-          )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Campo etiqueta="Nombre" valor={form.nombre} onChange={(v) => actualizar('nombre', v)} />
-            <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} />
-            <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} />
-            <Campo etiqueta="Serial" valor={form.serial} onChange={(v) => actualizar('serial', v)} />
-            <Campo etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)} />
-            <Campo etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} />
-            <div>
-              <label className="text-xs uppercase tracking-wide text-gray-400">Estado</label>
-              <select
-                value={form.estado}
-                onChange={(e) => actualizar('estado', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="operativo">Operativo</option>
-                <option value="mantenimiento">En mantenimiento</option>
-                <option value="fuera de servicio">Fuera de servicio</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs uppercase tracking-wide text-gray-400">Fecha de compra</label>
-              <input
-                type="date"
-                value={form.fecha_compra}
-                onChange={(e) => actualizar('fecha_compra', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-              />
-            </div>
-            <Campo etiqueta="Proveedor" valor={form.proveedor} onChange={(v) => actualizar('proveedor', v)} />
-            <div>
-              <label className="text-xs uppercase tracking-wide text-gray-400">Garantía hasta</label>
-              <input
-                type="date"
-                value={form.garantia_hasta}
-                onChange={(e) => actualizar('garantia_hasta', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="text-xs uppercase tracking-wide text-gray-400">Costo de compra</label>
-              <input
-                type="number"
-                value={form.costo_compra}
-                onChange={(e) => actualizar('costo_compra', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="text-xs uppercase tracking-wide text-gray-400">Notas</label>
-              <textarea
-                value={form.notas}
-                onChange={(e) => actualizar('notas', e.target.value)}
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-                rows={3}
-              />
-            </div>
+    <div className="max-w-2xl mx-auto p-4 sm:p-8">
+      <Link href={`/equipos/${id}`} className="text-sm text-gray-500 hover:text-gray-900 font-medium inline-flex items-center gap-1">
+        ← Volver a la hoja de vida
+      </Link>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mt-4 p-6 sm:p-8">
+        <h1 className="text-xl font-semibold text-gray-900 mb-6">Editar equipo</h1>
+        {error && (
+          <p className="mb-5 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg">{error}</p>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Campo etiqueta="Nombre" valor={form.nombre} onChange={(v) => actualizar('nombre', v)} />
+          <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} />
+          <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} />
+          <Campo etiqueta="Serial" valor={form.serial} onChange={(v) => actualizar('serial', v)} />
+          <Campo etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)} />
+          <Campo etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} />
+          <Campo tipo="select" etiqueta="Estado" valor={form.estado} onChange={(v) => actualizar('estado', v)}>
+            <option value="operativo">Operativo</option>
+            <option value="mantenimiento">En mantenimiento</option>
+            <option value="fuera de servicio">Fuera de servicio</option>
+          </Campo>
+          <Campo tipo="date" etiqueta="Fecha de compra" valor={form.fecha_compra} onChange={(v) => actualizar('fecha_compra', v)} />
+          <Campo etiqueta="Proveedor" valor={form.proveedor} onChange={(v) => actualizar('proveedor', v)} />
+          <Campo tipo="date" etiqueta="Garantía hasta" valor={form.garantia_hasta} onChange={(v) => actualizar('garantia_hasta', v)} />
+          <Campo tipo="number" etiqueta="Costo de compra" valor={form.costo_compra} onChange={(v) => actualizar('costo_compra', v)} />
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5 block">Notas</label>
+            <textarea
+              value={form.notas}
+              onChange={(e) => actualizar('notas', e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              rows={3}
+            />
           </div>
-          <button
-            onClick={guardar}
-            disabled={guardando}
-            className="mt-6 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            {guardando ? 'Guardando...' : 'Guardar cambios'}
-          </button>
         </div>
+        <button
+          onClick={guardar}
+          disabled={guardando}
+          className="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
+        >
+          {guardando ? 'Guardando...' : 'Guardar cambios'}
+        </button>
       </div>
     </div>
   )
 }
 
-function Campo({ etiqueta, valor, onChange }) {
+function Campo({ etiqueta, valor, onChange, tipo = 'text', children }) {
+  const inputClass = "w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
   return (
     <div>
-      <label className="text-xs uppercase tracking-wide text-gray-400">{etiqueta}</label>
-      <input
-        type="text"
-        value={valor}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2"
-      />
+      <label className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5 block">{etiqueta}</label>
+      {tipo === 'select' ? (
+        <select value={valor} onChange={(e) => onChange(e.target.value)} className={inputClass}>
+          {children}
+        </select>
+      ) : (
+        <input
+          type={tipo}
+          value={valor}
+          onChange={(e) => onChange(e.target.value)}
+          className={inputClass}
+        />
+      )}
     </div>
   )
 }

@@ -62,79 +62,100 @@ export default function Historial() {
     cargarHistorial()
   }
 
+  const inputClass = "w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+  const labelClass = "text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5 block"
+
   return (
-    <main className="p-8 bg-gray-50 min-h-screen">
+    <main className="max-w-3xl mx-auto p-4 sm:p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-blue-700">Historial de mantenimientos</h1>
+        <h1 className="text-xl font-semibold text-gray-900">Historial de mantenimientos</h1>
         <button onClick={() => setMostrarForm(!mostrarForm)}
-          className="bg-blue-700 text-white px-4 py-2 rounded-lg">
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
           + Registrar mantenimiento
         </button>
       </div>
+
       {mostrarForm && (
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h2 className="font-bold text-lg mb-4">Nuevo registro</h2>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="font-semibold text-gray-900 mb-4">Nuevo registro</h2>
           {error && (
-            <p className="mb-4 text-red-600 text-sm bg-red-50 p-3 rounded">{error}</p>
+            <p className="mb-4 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg">{error}</p>
           )}
-          <div className="grid grid-cols-2 gap-4">
-            <select value={form.equipo_id}
-              onChange={e => setForm({...form, equipo_id: e.target.value})}
-              className="border p-2 rounded">
-              <option value="">Seleccionar equipo</option>
-              {equipos.map(e => (
-                <option key={e.id} value={e.id}>{e.nombre}</option>
-              ))}
-            </select>
-            <input placeholder="Tipo de mantenimiento"
-              value={form.tipo}
-              onChange={e => setForm({...form, tipo: e.target.value})}
-              className="border p-2 rounded" />
-            <input placeholder="Técnico responsable"
-              value={form.tecnico}
-              onChange={e => setForm({...form, tecnico: e.target.value})}
-              className="border p-2 rounded" />
-            <input type="date" value={form.fecha}
-              onChange={e => setForm({...form, fecha: e.target.value})}
-              className="border p-2 rounded" />
-            <input placeholder="Costo (opcional)"
-              value={form.costo}
-              onChange={e => setForm({...form, costo: e.target.value})}
-              className="border p-2 rounded" />
-            <input placeholder="Descripción"
-              value={form.descripcion}
-              onChange={e => setForm({...form, descripcion: e.target.value})}
-              className="border p-2 rounded" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Equipo</label>
+              <select value={form.equipo_id}
+                onChange={e => setForm({...form, equipo_id: e.target.value})}
+                className={inputClass}>
+                <option value="">Seleccionar equipo</option>
+                {equipos.map(e => (
+                  <option key={e.id} value={e.id}>{e.nombre}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Tipo de mantenimiento</label>
+              <input value={form.tipo}
+                onChange={e => setForm({...form, tipo: e.target.value})}
+                className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Técnico responsable</label>
+              <input value={form.tecnico}
+                onChange={e => setForm({...form, tecnico: e.target.value})}
+                className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Fecha</label>
+              <input type="date" value={form.fecha}
+                onChange={e => setForm({...form, fecha: e.target.value})}
+                className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Costo (opcional)</label>
+              <input value={form.costo}
+                onChange={e => setForm({...form, costo: e.target.value})}
+                className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Descripción</label>
+              <input value={form.descripcion}
+                onChange={e => setForm({...form, descripcion: e.target.value})}
+                className={inputClass} />
+            </div>
           </div>
           <button onClick={guardar}
             disabled={guardando}
-            className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg disabled:opacity-50">
+            className="mt-5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-60">
             {guardando ? 'Guardando...' : 'Guardar registro'}
           </button>
         </div>
       )}
+
       {historial.length === 0 ? (
-        <p className="text-gray-500">No hay registros de mantenimiento aún.</p>
+        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center">
+          <p className="text-gray-500 text-sm">No hay registros de mantenimiento aún.</p>
+        </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="space-y-3">
           {historial.map(h => (
-            <div key={h.id} className="bg-white p-4 rounded-lg shadow">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h2 className="font-bold text-lg">{h.equipos?.nombre}</h2>
-                  <p className="text-gray-600">{h.tipo}</p>
-                  <p className="text-gray-500 text-sm">Técnico: {h.tecnico}</p>
-                  <p className="text-gray-500 text-sm">{h.descripcion}</p>
+            <div key={h.id} className="bg-white rounded-xl border border-gray-200 p-5">
+              <div className="flex justify-between items-start gap-4">
+                <div className="min-w-0">
+                  <h2 className="font-medium text-gray-900">{h.equipos?.nombre}</h2>
+                  <p className="text-gray-600 text-sm mt-0.5">{h.tipo}</p>
+                  {h.tecnico && <p className="text-gray-500 text-sm">Técnico: {h.tecnico}</p>}
+                  {h.descripcion && <p className="text-gray-500 text-sm">{h.descripcion}</p>}
                 </div>
-                <div className="text-right">
-                  <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                <div className="text-right shrink-0">
+                  <span className="text-xs font-medium bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">
                     {new Date(h.fecha).toLocaleDateString('es-CO')}
                   </span>
                   {h.costo && (
-                    <p className="text-green-600 font-medium mt-1">${h.costo}</p>
+                    <p className="text-emerald-600 font-medium mt-1 text-sm">${h.costo}</p>
                   )}
                   <button onClick={() => eliminar(h.id)}
-                    className="block mt-2 text-red-600 text-sm">
+                    className="block mt-2 text-red-600 text-xs font-medium hover:underline">
                     Eliminar
                   </button>
                 </div>
@@ -143,8 +164,9 @@ export default function Historial() {
           ))}
         </div>
       )}
+
       <div className="mt-6">
-        <a href="/" className="text-blue-700">← Volver al dashboard</a>
+        <a href="/" className="text-sm text-gray-500 hover:text-gray-900 font-medium">← Volver al dashboard</a>
       </div>
     </main>
   )

@@ -105,83 +105,108 @@ export default function Mantenimientos() {
 
   function colorFecha(fecha) {
     const diff = (new Date(fecha) - new Date()) / (1000 * 60 * 60 * 24)
-    if (diff < 0) return 'bg-red-100 text-red-700'
-    if (diff < 7) return 'bg-yellow-100 text-yellow-700'
-    return 'bg-green-100 text-green-700'
+    if (diff < 0) return 'bg-red-50 text-red-700'
+    if (diff < 7) return 'bg-amber-50 text-amber-700'
+    return 'bg-emerald-50 text-emerald-700'
   }
 
+  const inputClass = "w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+  const labelClass = "text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5 block"
+
   return (
-    <main className="p-8 bg-gray-50 min-h-screen">
+    <main className="max-w-3xl mx-auto p-4 sm:p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-blue-700">Plan de mantenimiento</h1>
-        <button onClick={() => setMostrarForm(!mostrarForm)} className="bg-blue-700 text-white px-4 py-2 rounded-lg">
+        <h1 className="text-xl font-semibold text-gray-900">Plan de mantenimiento</h1>
+        <button onClick={() => setMostrarForm(!mostrarForm)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
           + Agregar plan
         </button>
       </div>
 
       {mostrarForm && (
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h2 className="font-bold text-lg mb-4">Nuevo plan de mantenimiento</h2>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="font-semibold text-gray-900 mb-4">Nuevo plan</h2>
           {error && (
-            <p className="mb-4 text-red-600 text-sm bg-red-50 p-3 rounded">{error}</p>
+            <p className="mb-4 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg">{error}</p>
           )}
-          <div className="grid grid-cols-2 gap-4">
-            <select value={form.equipo_id} onChange={e => setForm({...form, equipo_id: e.target.value})} className="border p-2 rounded">
-              <option value="">Seleccionar equipo</option>
-              {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-            </select>
-            <input placeholder="Tipo de mantenimiento" value={form.tipo} onChange={e => setForm({...form, tipo: e.target.value})} className="border p-2 rounded" />
-            <select value={form.frecuencia} onChange={e => setForm({...form, frecuencia: e.target.value})} className="border p-2 rounded">
-              <option value="diario">Diario</option>
-              <option value="semanal">Semanal</option>
-              <option value="mensual">Mensual</option>
-              <option value="trimestral">Trimestral</option>
-              <option value="semestral">Semestral</option>
-              <option value="anual">Anual</option>
-            </select>
-            <input type="date" value={form.proxima_fecha} onChange={e => setForm({...form, proxima_fecha: e.target.value})} className="border p-2 rounded" />
-            <input placeholder="Técnico responsable" value={form.tecnico} onChange={e => setForm({...form, tecnico: e.target.value})} className="border p-2 rounded" />
-            <input placeholder="Descripción" value={form.descripcion} onChange={e => setForm({...form, descripcion: e.target.value})} className="border p-2 rounded" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Equipo</label>
+              <select value={form.equipo_id} onChange={e => setForm({...form, equipo_id: e.target.value})} className={inputClass}>
+                <option value="">Seleccionar equipo</option>
+                {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Tipo de mantenimiento</label>
+              <input value={form.tipo} onChange={e => setForm({...form, tipo: e.target.value})} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Frecuencia</label>
+              <select value={form.frecuencia} onChange={e => setForm({...form, frecuencia: e.target.value})} className={inputClass}>
+                <option value="diario">Diario</option>
+                <option value="semanal">Semanal</option>
+                <option value="mensual">Mensual</option>
+                <option value="trimestral">Trimestral</option>
+                <option value="semestral">Semestral</option>
+                <option value="anual">Anual</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Próxima fecha</label>
+              <input type="date" value={form.proxima_fecha} onChange={e => setForm({...form, proxima_fecha: e.target.value})} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Técnico responsable</label>
+              <input value={form.tecnico} onChange={e => setForm({...form, tecnico: e.target.value})} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Descripción</label>
+              <input value={form.descripcion} onChange={e => setForm({...form, descripcion: e.target.value})} className={inputClass} />
+            </div>
           </div>
           <button onClick={guardar}
             disabled={guardando}
-            className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg disabled:opacity-50">
+            className="mt-5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-60">
             {guardando ? 'Guardando...' : 'Guardar plan'}
           </button>
         </div>
       )}
 
-      <div className="grid gap-4">
-        {planes.length === 0 ? (
-          <p className="text-gray-500">No hay planes de mantenimiento aún.</p>
-        ) : (
-          planes.map(p => (
-            <div key={p.id} className="bg-white p-4 rounded-lg shadow">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="font-bold text-lg">{p.equipos?.nombre}</h2>
-                  <p className="text-gray-500">{p.tipo} · {p.frecuencia}</p>
-                  <p className="text-gray-500 text-sm">Técnico: {p.tecnico}</p>
+      {planes.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center">
+          <p className="text-gray-500 text-sm">No hay planes de mantenimiento aún.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {planes.map(p => (
+            <div key={p.id} className="bg-white rounded-xl border border-gray-200 p-5">
+              <div className="flex justify-between items-center gap-4">
+                <div className="min-w-0">
+                  <h2 className="font-medium text-gray-900">{p.equipos?.nombre}</h2>
+                  <p className="text-gray-500 text-sm mt-0.5">{p.tipo} · {p.frecuencia}</p>
+                  {p.tecnico && <p className="text-gray-500 text-sm">Técnico: {p.tecnico}</p>}
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span className={`text-sm px-3 py-1 rounded-full font-medium ${colorFecha(p.proxima_fecha)}`}>
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${colorFecha(p.proxima_fecha)}`}>
                     {new Date(p.proxima_fecha).toLocaleDateString('es-CO')}
                   </span>
-                  <div className="flex gap-2">
-                    <button onClick={() => completar(p)} className="bg-blue-700 text-white px-3 py-1 rounded-lg text-sm">
+                  <div className="flex gap-1">
+                    <button onClick={() => completar(p)} className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                       Completar
                     </button>
-                    <button onClick={() => eliminar(p.id)} className="text-red-600 text-sm">
+                    <button onClick={() => eliminar(p.id)} className="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                       Eliminar
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-          ))
-        )}
+          ))}
+        </div>
+      )}
+      <div className="mt-6">
+        <a href="/" className="text-sm text-gray-500 hover:text-gray-900 font-medium">← Volver al dashboard</a>
       </div>
-      <div className="mt-6"><a href="/" className="text-blue-700">← Volver al dashboard</a></div>
     </main>
   )
 }

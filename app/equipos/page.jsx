@@ -52,9 +52,15 @@ export default function Equipos() {
       </div>
 
       {cargando ? (
-        <p className="text-gray-400 text-sm">Cargando equipos...</p>
+        <div className="space-y-3">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="h-[74px] rounded-xl bg-white border border-gray-100 overflow-hidden relative">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.4s_infinite] bg-gradient-to-r from-transparent via-gray-100 to-transparent" />
+            </div>
+          ))}
+        </div>
       ) : equipos.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center flex flex-col items-center">
+        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center flex flex-col items-center animate-fade-up">
           <span className="h-12 w-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-3">
             <IconInbox className="h-6 w-6" />
           </span>
@@ -62,13 +68,14 @@ export default function Equipos() {
         </div>
       ) : (
         <div className="space-y-3">
-          {equipos.map((eq) => (
+          {equipos.map((eq, i) => (
             <Link
               key={eq.id}
               href={`/equipos/${eq.id}`}
-              className="flex items-center gap-4 bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-300 hover:shadow-sm transition-all group"
+              className="flex items-center gap-4 bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group animate-fade-up"
+              style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
             >
-              <span className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${estadoIconBg(eq.estado)}`}>
+              <span className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110 ${estadoIconBg(eq.estado)}`}>
                 <IconBox className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">

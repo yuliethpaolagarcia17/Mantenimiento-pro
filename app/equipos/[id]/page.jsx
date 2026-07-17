@@ -4,7 +4,10 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { QRCodeCanvas } from 'qrcode.react'
-import { IconWrench } from '../../components/Icons'
+import {
+  IconWrench, IconTag, IconBox, IconMapPin, IconUser, IconCalendar,
+  IconBuilding, IconShieldCheck, IconDollarSign, IconFileText, IconEdit, IconTrash, IconClock
+} from '../../components/Icons'
 
 export default function HojaVida({ params }) {
   const { id } = use(params)
@@ -55,133 +58,161 @@ export default function HojaVida({ params }) {
     router.push('/equipos')
   }
 
-  if (cargando) return <p className="p-8 text-gray-400 text-sm">Cargando equipo...</p>
-  if (!equipo) return <p className="p-8 text-gray-400 text-sm">Equipo no encontrado</p>
+  if (cargando) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex items-center gap-2.5 text-slate-400 text-sm">
+          <span className="h-4 w-4 rounded-full border-2 border-slate-200 border-t-indigo-500 animate-spin" />
+          Cargando equipo...
+        </div>
+      </div>
+    )
+  }
+  if (!equipo) return <p className="p-8 text-slate-400 text-sm">Equipo no encontrado</p>
 
-  const estadoColor =
-    equipo.estado === 'operativo'
-      ? 'bg-emerald-50 text-emerald-700'
-      : equipo.estado === 'mantenimiento'
-      ? 'bg-amber-50 text-amber-700'
-      : 'bg-red-50 text-red-700'
+  const estadoBadge =
+    equipo.estado === 'operativo' ? 'badge-emerald'
+    : equipo.estado === 'mantenimiento' ? 'badge-amber'
+    : 'badge-rose'
 
   const estadoDot =
-    equipo.estado === 'operativo'
-      ? 'bg-emerald-500'
-      : equipo.estado === 'mantenimiento'
-      ? 'bg-amber-500'
-      : 'bg-red-500'
+    equipo.estado === 'operativo' ? 'bg-emerald-500'
+    : equipo.estado === 'mantenimiento' ? 'bg-amber-500'
+    : 'bg-rose-500'
 
   const urlEquipo =
     typeof window !== 'undefined' ? window.location.href : ''
 
   return (
-    <div className="max-w-3xl mx-auto p-4 sm:p-8">
-      <Link href="/equipos" className="text-sm text-gray-500 hover:text-gray-900 font-medium inline-flex items-center gap-1 group w-fit">
+    <div className="max-w-4xl mx-auto p-4 sm:p-8 w-full">
+      <Link href="/equipos" className="text-sm text-slate-500 hover:text-slate-900 font-medium inline-flex items-center gap-1 group w-fit">
         <span className="transition-transform duration-200 group-hover:-translate-x-0.5">←</span> Volver a equipos
       </Link>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mt-4 p-6 sm:p-8 animate-fade-up">
-        <div className="flex items-start justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">{equipo.nombre}</h1>
-            <p className="text-gray-500 mt-1 text-sm">Hoja de vida del equipo</p>
-          </div>
-          <span className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${estadoColor}`}>
-            <span className={`h-2 w-2 rounded-full ${estadoDot}`} />
-            {equipo.estado}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
-          <Dato etiqueta="Marca" valor={equipo.marca} />
-          <Dato etiqueta="Modelo" valor={equipo.modelo} />
-          <Dato etiqueta="Serial" valor={equipo.serial} />
-          <Dato etiqueta="Ubicación" valor={equipo.ubicacion} />
-          <Dato etiqueta="Responsable" valor={equipo.responsable} />
-          <Dato etiqueta="Fecha de compra" valor={equipo.fecha_compra || 'No registrada'} />
-          <Dato etiqueta="Proveedor" valor={equipo.proveedor || 'No registrado'} />
-          <Dato etiqueta="Garantía hasta" valor={equipo.garantia_hasta || 'No registrada'} />
-          <Dato etiqueta="Costo de compra" valor={equipo.costo_compra ? `$${equipo.costo_compra}` : 'No registrado'} />
-        </div>
-
-        {equipo.notas && (
-          <div className="mt-7 pt-6 border-t border-gray-100">
-            <p className="text-xs font-medium uppercase tracking-wide text-gray-400 mb-2">Notas</p>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{equipo.notas}</p>
-          </div>
-        )}
-
-        <div className="mt-7 pt-6 border-t border-gray-100">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400 mb-3">
-            Historial de mantenimientos ({historial.length})
-          </p>
-          {historial.length === 0 ? (
-            <p className="text-gray-500 text-sm">Este equipo no tiene mantenimientos registrados.</p>
-          ) : (
-            <div className="space-y-2">
-              {historial.map(h => (
-                <div key={h.id} className="bg-gray-50 rounded-xl p-4 flex justify-between items-start gap-4 hover:bg-indigo-50/50 transition-colors">
-                  <div className="min-w-0">
-                    <p className="font-medium text-gray-900 text-sm">{h.tipo}</p>
-                    {h.tecnico && <p className="text-sm text-gray-500 mt-0.5">Técnico: {h.tecnico}</p>}
-                    {h.descripcion && <p className="text-sm text-gray-500 mt-0.5">{h.descripcion}</p>}
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className="text-xs font-medium bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">
-                      {new Date(h.fecha).toLocaleDateString('es-CO')}
-                    </span>
-                    {h.costo && <p className="text-emerald-600 font-medium mt-1 text-sm">${h.costo}</p>}
-                  </div>
+      <div className="grid lg:grid-cols-3 gap-6 mt-4">
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <div className="card p-6 sm:p-8 animate-fade-up">
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div className="flex items-start gap-4">
+                <span className="icon-tile h-12 w-12 bg-brand-gradient text-white shadow-elevate shrink-0">
+                  <IconBox className="h-5.5 w-5.5" />
+                </span>
+                <div>
+                  <h1 className="text-2xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>{equipo.nombre}</h1>
+                  <p className="text-slate-500 mt-0.5 text-sm">Hoja de vida del equipo</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="mt-7 pt-6 border-t border-gray-100">
-          <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-5 flex flex-col sm:flex-row items-center gap-5">
-            <div className="p-3 bg-white border border-gray-200 rounded-xl shrink-0 shadow-sm">
-              <QRCodeCanvas value={urlEquipo} size={130} />
-            </div>
-            <div className="text-center sm:text-left">
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 uppercase tracking-wide mb-1.5">
-                <IconWrench className="h-3.5 w-3.5" />
-                Acceso instantáneo con código QR
               </div>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Cada equipo tiene un código QR único. Al escanearlo desde el celular, el técnico
-                accede de inmediato a esta hoja de vida — sin buscar papeles ni carpetas.
-              </p>
+              <span className={`shrink-0 inline-flex items-center gap-1.5 ${estadoBadge}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${estadoDot}`} />
+                {equipo.estado}
+              </span>
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+              <Dato icon={IconTag} etiqueta="Marca" valor={equipo.marca} />
+              <Dato icon={IconBox} etiqueta="Modelo" valor={equipo.modelo} />
+              <Dato icon={IconFileText} etiqueta="Serial" valor={equipo.serial} />
+              <Dato icon={IconMapPin} etiqueta="Ubicación" valor={equipo.ubicacion} />
+              <Dato icon={IconUser} etiqueta="Responsable" valor={equipo.responsable} />
+              <Dato icon={IconCalendar} etiqueta="Fecha de compra" valor={equipo.fecha_compra || 'No registrada'} />
+              <Dato icon={IconBuilding} etiqueta="Proveedor" valor={equipo.proveedor || 'No registrado'} />
+              <Dato icon={IconShieldCheck} etiqueta="Garantía hasta" valor={equipo.garantia_hasta || 'No registrada'} />
+              <Dato icon={IconDollarSign} etiqueta="Costo de compra" valor={equipo.costo_compra ? `$${equipo.costo_compra}` : 'No registrado'} />
+            </div>
+
+            {equipo.notas && (
+              <div className="mt-7 pt-6 border-t border-slate-100">
+                <p className="section-eyebrow mb-2">Notas</p>
+                <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{equipo.notas}</p>
+              </div>
+            )}
+
+            <div className="mt-7 pt-6 border-t border-slate-100 flex flex-wrap gap-3">
+              <Link href={`/equipos/${id}/editar`} className="btn btn-primary btn-md">
+                <IconEdit className="h-4 w-4" />
+                Editar equipo
+              </Link>
+              <button onClick={eliminar} disabled={eliminando} className="btn btn-danger-ghost btn-md">
+                <IconTrash className="h-4 w-4" />
+                {eliminando ? 'Eliminando...' : 'Eliminar equipo'}
+              </button>
+            </div>
+          </div>
+
+          <div className="card p-6 sm:p-8 animate-fade-up" style={{ animationDelay: '0.05s' }}>
+            <p className="section-eyebrow mb-4">
+              Historial de mantenimientos ({historial.length})
+            </p>
+            {historial.length === 0 ? (
+              <p className="text-slate-500 text-sm">Este equipo no tiene mantenimientos registrados.</p>
+            ) : (
+              <div className="relative flex flex-col gap-4 pl-1">
+                {historial.map((h, i) => (
+                  <div key={h.id} className="relative pl-6">
+                    {i !== historial.length - 1 && (
+                      <span className="absolute left-[5px] top-4 bottom-[-16px] w-px bg-slate-200" />
+                    )}
+                    <span className="absolute left-0 top-1.5 h-2.5 w-2.5 rounded-full bg-indigo-500 ring-4 ring-indigo-100" />
+                    <div className="bg-slate-50/70 rounded-xl p-4 flex justify-between items-start gap-4 hover:bg-indigo-50/50 transition-colors">
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-900 text-sm">{h.tipo}</p>
+                        {h.tecnico && <p className="text-sm text-slate-500 mt-0.5">Técnico: {h.tecnico}</p>}
+                        {h.descripcion && <p className="text-sm text-slate-500 mt-0.5">{h.descripcion}</p>}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="badge-indigo">
+                          {new Date(h.fecha).toLocaleDateString('es-CO')}
+                        </span>
+                        {h.costo && <p className="text-emerald-600 font-medium mt-1 text-sm">${h.costo}</p>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="mt-7 pt-6 border-t border-gray-100 flex justify-center gap-3">
-          <Link
-            href={`/equipos/${id}/editar`}
-            className="bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-sm shadow-indigo-200 transition-all"
-          >
-            Editar equipo
-          </Link>
-          <button
-            onClick={eliminar}
-            disabled={eliminando}
-            className="text-red-600 hover:bg-red-50 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-          >
-            {eliminando ? 'Eliminando...' : 'Eliminar equipo'}
-          </button>
+        <div className="flex flex-col gap-6">
+          <div className="card p-6 flex flex-col items-center text-center animate-fade-up" style={{ animationDelay: '0.1s' }}>
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 uppercase tracking-wide mb-4">
+              <IconWrench className="h-3.5 w-3.5" />
+              Código QR
+            </div>
+            <div className="p-3 bg-white border border-slate-200 rounded-xl shrink-0 shadow-sm">
+              <QRCodeCanvas value={urlEquipo} size={150} />
+            </div>
+            <p className="text-sm text-slate-500 leading-relaxed mt-4">
+              Escanéalo desde el celular para acceder de inmediato a esta hoja de vida, sin buscar papeles ni carpetas.
+            </p>
+          </div>
+
+          <div className="card p-6 bg-gradient-to-br from-indigo-600 to-violet-700 text-white animate-fade-up" style={{ animationDelay: '0.15s' }}>
+            <span className="icon-tile h-9 w-9 bg-white/15 ring-1 ring-white/20 mb-3">
+              <IconClock className="h-4.5 w-4.5" />
+            </span>
+            <p className="font-medium text-sm">Próximo mantenimiento</p>
+            <p className="text-indigo-100/80 text-xs mt-1 leading-relaxed">
+              Consulta o programa el siguiente plan para este equipo desde la sección de mantenimientos.
+            </p>
+            <Link href="/mantenimientos" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold bg-white/15 hover:bg-white/25 transition-colors px-3 py-2 rounded-lg">
+              Ir a mantenimientos →
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-function Dato({ etiqueta, valor }) {
+function Dato({ icon: Icon, etiqueta, valor }) {
   return (
-    <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">{etiqueta}</p>
-      <p className="text-sm text-gray-900 mt-1">{valor}</p>
+    <div className="flex items-start gap-2.5">
+      <Icon className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+      <div className="min-w-0">
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{etiqueta}</p>
+        <p className="text-sm text-slate-900 mt-0.5 truncate">{valor}</p>
+      </div>
     </div>
   )
 }

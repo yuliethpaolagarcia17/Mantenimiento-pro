@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Lexend } from "next/font/google";
 import Nav from "./components/Nav";
+import Footer from "./components/Footer";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const lexend = Lexend({
+  variable: "--font-lexend",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "MantenPro",
-  description: "Sistema de Mantenimiento Preventivo",
+  title: "MantenPro — Mantenimiento preventivo",
+  description: "Plataforma de mantenimiento preventivo: equipos, planes, historial y trazabilidad en un solo lugar.",
 };
 
 export default function RootLayout({
@@ -24,10 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="es" data-scroll-behavior="smooth">
+      <body className={`${inter.variable} ${lexend.variable} antialiased flex min-h-screen flex-col`}>
         <Nav />
-        {children}
+        <div className="flex-1 flex flex-col">{children}</div>
+        <Footer />
       </body>
     </html>
   );

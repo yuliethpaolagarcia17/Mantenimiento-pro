@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { IconBox } from '../../components/Icons'
 
 export default function NuevoEquipo() {
   const router = useRouter()
@@ -50,13 +51,18 @@ export default function NuevoEquipo() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-8">
-      <Link href="/equipos" className="text-sm text-gray-500 hover:text-gray-900 font-medium inline-flex items-center gap-1">
-        ← Volver a equipos
+      <Link href="/equipos" className="text-sm text-gray-500 hover:text-gray-900 font-medium inline-flex items-center gap-1 group w-fit">
+        <span className="transition-transform duration-200 group-hover:-translate-x-0.5">←</span> Volver a equipos
       </Link>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mt-4 p-6 sm:p-8">
-        <h1 className="text-xl font-semibold text-gray-900 mb-6">Agregar equipo</h1>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mt-4 p-6 sm:p-8 animate-fade-up">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <IconBox className="h-5 w-5" />
+          </span>
+          <h1 className="text-xl font-semibold text-gray-900">Agregar equipo</h1>
+        </div>
         {error && (
-          <p className="mb-5 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg">{error}</p>
+          <p className="mb-5 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg animate-fade-in">{error}</p>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Campo etiqueta="Nombre" valor={form.nombre} onChange={(v) => actualizar('nombre', v)} />
@@ -87,7 +93,7 @@ export default function NuevoEquipo() {
         <button
           onClick={guardar}
           disabled={guardando}
-          className="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
+          className="mt-6 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-sm shadow-indigo-200 transition-all disabled:opacity-60"
         >
           {guardando ? 'Guardando...' : 'Guardar equipo'}
         </button>
@@ -97,7 +103,7 @@ export default function NuevoEquipo() {
 }
 
 function Campo({ etiqueta, valor, onChange, tipo = 'text', children }) {
-  const inputClass = "w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+  const inputClass = "w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow"
   return (
     <div>
       <label className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5 block">{etiqueta}</label>

@@ -71,17 +71,17 @@ export default function Historial() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold text-gray-900">Historial de mantenimientos</h1>
         <button onClick={() => setMostrarForm(!mostrarForm)}
-          className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-indigo-200">
-          <IconPlus className="h-4 w-4" />
-          Registrar mantenimiento
+          className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm shadow-indigo-200 transition-all">
+          <IconPlus className={`h-4 w-4 transition-transform duration-200 ${mostrarForm ? 'rotate-45' : ''}`} />
+          {mostrarForm ? 'Cerrar' : 'Registrar mantenimiento'}
         </button>
       </div>
 
       {mostrarForm && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6 animate-fade-up">
           <h2 className="font-semibold text-gray-900 mb-4">Nuevo registro</h2>
           {error && (
-            <p className="mb-4 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg">{error}</p>
+            <p className="mb-4 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg animate-fade-in">{error}</p>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -128,14 +128,14 @@ export default function Historial() {
           </div>
           <button onClick={guardar}
             disabled={guardando}
-            className="mt-5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-60">
+            className="mt-5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-sm shadow-indigo-200 transition-all disabled:opacity-60">
             {guardando ? 'Guardando...' : 'Guardar registro'}
           </button>
         </div>
       )}
 
       {historial.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center flex flex-col items-center">
+        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-10 text-center flex flex-col items-center animate-fade-up">
           <span className="h-12 w-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-3">
             <IconInbox className="h-6 w-6" />
           </span>
@@ -143,8 +143,12 @@ export default function Historial() {
         </div>
       ) : (
         <div className="space-y-3">
-          {historial.map(h => (
-            <div key={h.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
+          {historial.map((h, i) => (
+            <div
+              key={h.id}
+              className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 animate-fade-up"
+              style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
+            >
               <div className="flex justify-between items-start gap-4">
                 <div className="flex items-start gap-3 min-w-0">
                   <span className="h-9 w-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">

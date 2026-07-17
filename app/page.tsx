@@ -1,8 +1,40 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { IconLayers, IconCheckCircle, IconWrench, IconXCircle, IconArrowRight, IconAlertTriangle, IconBox, IconClock, IconLogOut } from './components/Icons'
+import { IconLayers, IconCheckCircle, IconWrench, IconXCircle, IconArrowRight, IconAlertTriangle, IconBox, IconClock, IconLogOut, IconSparkle } from './components/Icons'
+
+function AnimatedNumber({ value }: { value: number }) {
+  const [display, setDisplay] = useState(0)
+  const prev = useRef(0)
+
+  useEffect(() => {
+    const from = prev.current
+    const to = value
+    if (from === to) return
+    const duration = 600
+    const start = performance.now()
+    let raf: number
+    function tick(now: number) {
+      const t = Math.min(1, (now - start) / duration)
+      const eased = 1 - Math.pow(1 - t, 3)
+      setDisplay(Math.round(from + (to - from) * eased))
+      if (t < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    prev.current = to
+    return () => cancelAnimationFrame(raf)
+  }, [value])
+
+  return <>{display}</>
+}
+
+function saludo() {
+  const h = new Date().getHours()
+  if (h < 12) return 'Buenos días'
+  if (h < 19) return 'Buenas tardes'
+  return 'Buenas noches'
+}
 
 export default function Home() {
   const [stats, setStats] = useState({ total: 0, operativos: 0, mantenimiento: 0, fuera: 0 })
@@ -87,10 +119,10 @@ export default function Home() {
   }
 
   const statCards = [
-    { label: 'Total equipos', value: stats.total, icon: IconLayers, ring: 'text-gray-500 bg-gray-100' },
-    { label: 'Operativos', value: stats.operativos, icon: IconCheckCircle, ring: 'text-emerald-600 bg-emerald-50' },
-    { label: 'En mantenimiento', value: stats.mantenimiento, icon: IconWrench, ring: 'text-amber-500 bg-amber-50' },
-    { label: 'Fuera de servicio', value: stats.fuera, icon: IconXCircle, ring: 'text-red-500 bg-red-50' },
+    { label: 'Total equipos', value: stats.total, icon: IconLayers, iconClass: 'text-gray-600 bg-gray-100', bar: 'bg-gray-400' },
+    { label: 'Operativos', value: stats.operativos, icon: IconCheckCircle, iconClass: 'text-emerald-600 bg-emerald-50', bar: 'bg-emerald-500' },
+    { label: 'En mantenimiento', value: stats.mantenimiento, icon: IconWrench, iconClass: 'text-amber-600 bg-amber-50', bar: 'bg-amber-500' },
+    { label: 'Fuera de servicio', value: stats.fuera, icon: IconXCircle, iconClass: 'text-red-600 bg-red-50', bar: 'bg-red-500' },
   ]
 
   const links = [
@@ -99,24 +131,49 @@ export default function Home() {
     { href: '/historial', title: 'Historial', desc: 'Mantenimientos realizados', icon: IconClock },
   ]
 
+  const pctOperativo = stats.total ? Math.round((stats.operativos / stats.total) * 100) : 0
+
   return (
     <main className="max-w-5xl mx-auto p-4 sm:p-8">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 tracking-tight">MantenPro</h1>
-          <p className="text-gray-500 text-sm mt-1">Sistema de mantenimiento preventivo</p>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-800 p-6 sm:p-8 mb-8 animate-fade-up shadow-lg shadow-indigo-950/10">
+        <div className="pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-sky-400/20 blur-2xl" />
+        <div className="relative flex justify-between items-start gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-100 uppercase tracking-wide mb-2">
+              <IconSparkle className="h-3.5 w-3.5" />
+              {saludo()}
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">MantenPro</h1>
+            <p className="text-indigo-200 text-sm mt-1">Sistema de mantenimiento preventivo</p>
+          </div>
+          <button
+            onClick={cerrarSesion}
+            className="flex items-center gap-1.5 text-sm text-indigo-100 hover:text-white font-medium px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors shrink-0"
+          >
+            <IconLogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Cerrar sesión</span>
+          </button>
         </div>
-        <button
-          onClick={cerrarSesion}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
-        >
-          <IconLogOut className="h-4 w-4" />
-          <span className="hidden sm:inline">Cerrar sesión</span>
-        </button>
+
+        {stats.total > 0 && (
+          <div className="relative mt-6">
+            <div className="flex items-center justify-between text-xs text-indigo-100 mb-1.5">
+              <span>Equipos operativos</span>
+              <span className="font-semibold">{pctOperativo}%</span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-white/15 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-emerald-400 transition-[width] duration-700 ease-out"
+                style={{ width: `${pctOperativo}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {alertas.length > 0 && (
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-up" style={{ animationDelay: '0.05s' }}>
           <h2 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide text-gray-500">
             Alertas de mantenimiento
           </h2>
@@ -138,14 +195,21 @@ export default function Home() {
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-        {statCards.map(card => {
+        {statCards.map((card, i) => {
           const Icon = card.icon
           return (
-            <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
-              <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg mb-3 ${card.ring}`}>
+            <div
+              key={card.label}
+              className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 animate-fade-up"
+              style={{ animationDelay: `${0.1 + i * 0.05}s` }}
+            >
+              <span className={`absolute top-0 left-0 right-0 h-1 ${card.bar} opacity-70`} />
+              <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg mb-3 transition-transform duration-200 group-hover:scale-110 ${card.iconClass}`}>
                 <Icon className="h-4.5 w-4.5" />
               </span>
-              <div className="text-3xl font-semibold text-gray-900">{card.value}</div>
+              <div className="text-3xl font-semibold text-gray-900 tabular-nums">
+                <AnimatedNumber value={card.value} />
+              </div>
               <div className="text-gray-500 text-sm mt-1">{card.label}</div>
             </div>
           )
@@ -156,16 +220,17 @@ export default function Home() {
         Accesos rápidos
       </h2>
       <div className="grid sm:grid-cols-3 gap-4">
-        {links.map(link => {
+        {links.map((link, i) => {
           const Icon = link.icon
           return (
             <Link
               key={link.href}
               href={link.href}
-              className="bg-white border border-gray-200 rounded-xl p-5 hover:border-indigo-300 hover:shadow-sm transition-all group"
+              className="bg-white border border-gray-200 rounded-xl p-5 hover:border-indigo-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group animate-fade-up"
+              style={{ animationDelay: `${0.3 + i * 0.05}s` }}
             >
               <div className="flex items-center justify-between">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 transition-transform duration-200 group-hover:scale-110">
                   <Icon className="h-4.5 w-4.5" />
                 </span>
                 <IconArrowRight className="h-4 w-4 text-gray-300 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" />

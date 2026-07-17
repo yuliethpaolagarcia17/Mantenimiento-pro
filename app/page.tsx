@@ -36,50 +36,57 @@ function saludo() {
   return 'Buenas noches'
 }
 
+type Alerta = {
+  id: string | number
+  tipo: string
+  proxima_fecha: string
+  equipos?: { nombre: string } | null
+}
+
 export default function Home() {
   const [stats, setStats] = useState({ total: 0, operativos: 0, mantenimiento: 0, fuera: 0 })
-  const [alertas, setAlertas] = useState<any[]>([])
+  const [alertas, setAlertas] = useState<Alerta[]>([])
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
+    async function cargar() {
+      const { data, error } = await supabase.from('equipos').select('*')
+      if (error) console.error('Error cargando equipos:', error)
+      if (data) {
+        setStats({
+          total: data.length,
+          operativos: data.filter(e => e.estado === 'operativo').length,
+          mantenimiento: data.filter(e => e.estado === 'mantenimiento').length,
+          fuera: data.filter(e => e.estado === 'fuera de servicio').length
+        })
+      }
+    }
+
+    async function cargarAlertas() {
+      const hoy = new Date()
+      const en7dias = new Date()
+      en7dias.setDate(hoy.getDate() + 7)
+      const { data, error } = await supabase
+        .from('planes_mantenimiento')
+        .select('*, equipos(nombre)')
+        .lte('proxima_fecha', en7dias.toISOString().split('T')[0])
+      if (error) console.error('Error cargando alertas:', error)
+      setAlertas(data || [])
+    }
+
+    async function verificarSesion() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        window.location.replace('/login')
+        return
+      }
+      cargar()
+      cargarAlertas()
+      setCargando(false)
+    }
+
     verificarSesion()
   }, [])
-
-  async function verificarSesion() {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      window.location.replace('/login')
-      return
-    }
-    cargar()
-    cargarAlertas()
-    setCargando(false)
-  }
-
-  async function cargar() {
-    const { data, error } = await supabase.from('equipos').select('*')
-    if (error) console.error('Error cargando equipos:', error)
-    if (data) {
-      setStats({
-        total: data.length,
-        operativos: data.filter(e => e.estado === 'operativo').length,
-        mantenimiento: data.filter(e => e.estado === 'mantenimiento').length,
-        fuera: data.filter(e => e.estado === 'fuera de servicio').length
-      })
-    }
-  }
-
-  async function cargarAlertas() {
-    const hoy = new Date()
-    const en7dias = new Date()
-    en7dias.setDate(hoy.getDate() + 7)
-    const { data, error } = await supabase
-      .from('planes_mantenimiento')
-      .select('*, equipos(nombre)')
-      .lte('proxima_fecha', en7dias.toISOString().split('T')[0])
-    if (error) console.error('Error cargando alertas:', error)
-    setAlertas(data || [])
-  }
 
   async function cerrarSesion() {
     try {

@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import Link from 'next/link'
 import { IconPlus, IconInbox, IconWrench } from '../components/Icons'
 
 const DIAS_POR_FRECUENCIA = {
@@ -222,7 +223,7 @@ export default function Mantenimientos() {
         </div>
       )}
       <div className="mt-6">
-        <a href="/" className="text-sm text-gray-500 hover:text-gray-900 font-medium">← Volver al dashboard</a>
+        <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 font-medium">← Volver al dashboard</Link>
       </div>
     </main>
   )

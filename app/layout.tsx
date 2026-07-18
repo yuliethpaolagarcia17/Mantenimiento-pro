@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Lexend } from "next/font/google";
-import Nav from "./components/Nav";
-import Footer from "./components/Footer";
+import AppShell from "./components/AppShell";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,9 +27,7 @@ export default function RootLayout({
   return (
     <html lang="es" data-scroll-behavior="smooth">
       <body className={`${inter.variable} ${lexend.variable} antialiased flex min-h-screen flex-col`}>
-        <Nav />
-        <div className="flex-1 flex flex-col">{children}</div>
-        <Footer />
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

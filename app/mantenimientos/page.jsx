@@ -1,8 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { IconPlus, IconInbox, IconWrench, IconX, IconAlertTriangle, IconCalendar } from '../components/Icons'
+import { TIPOS_MANTENIMIENTO } from '@/lib/constantes'
+import { IconPlus, IconInbox, IconWrench, IconX, IconAlertTriangle, IconCalendar, IconMapPin, IconUser } from '../components/Icons'
 
 const DIAS_POR_FRECUENCIA = {
   diario: 1,
@@ -35,7 +36,7 @@ export default function Mantenimientos() {
   async function cargarPlanes() {
     const { data, error } = await supabase
       .from('planes_mantenimiento')
-      .select('*, equipos(nombre)')
+      .select('*, equipos(nombre, ubicacion)')
       .order('proxima_fecha', { ascending: true })
     if (error) console.error('Error cargando planes:', error)
     setPlanes(data || [])
@@ -112,6 +113,14 @@ export default function Mantenimientos() {
     return 'badge-emerald'
   }
 
+  const tecnicos = useMemo(() => {
+    const nombres = [
+      ...planes.map(p => p.tecnico),
+      ...equipos.map(e => e.responsable),
+    ].filter(Boolean)
+    return [...new Set(nombres)].sort()
+  }, [planes, equipos])
+
   return (
     <main className="max-w-4xl mx-auto p-4 sm:p-8 w-full">
       <div className="flex justify-between items-center mb-6 animate-fade-up">
@@ -136,15 +145,18 @@ export default function Mantenimientos() {
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label-field">Equipo</label>
+              <label className="label-field">Equipo (¿dónde?)</label>
               <select value={form.equipo_id} onChange={e => setForm({...form, equipo_id: e.target.value})} className="input-field">
                 <option value="">Seleccionar equipo</option>
-                {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+                {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}{e.ubicacion ? ` — ${e.ubicacion}` : ''}</option>)}
               </select>
             </div>
             <div>
-              <label className="label-field">Tipo de mantenimiento</label>
-              <input value={form.tipo} onChange={e => setForm({...form, tipo: e.target.value})} className="input-field" />
+              <label className="label-field">Tipo de mantenimiento (¿qué?)</label>
+              <select value={form.tipo} onChange={e => setForm({...form, tipo: e.target.value})} className="input-field">
+                <option value="">Seleccionar tipo</option>
+                {TIPOS_MANTENIMIENTO.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
             </div>
             <div>
               <label className="label-field">Frecuencia</label>
@@ -158,12 +170,15 @@ export default function Mantenimientos() {
               </select>
             </div>
             <div>
-              <label className="label-field">Próxima fecha</label>
+              <label className="label-field">Próxima fecha (¿cuándo?)</label>
               <input type="date" value={form.proxima_fecha} onChange={e => setForm({...form, proxima_fecha: e.target.value})} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Técnico responsable</label>
-              <input value={form.tecnico} onChange={e => setForm({...form, tecnico: e.target.value})} className="input-field" />
+              <label className="label-field">Técnico responsable (¿quién?)</label>
+              <input value={form.tecnico} onChange={e => setForm({...form, tecnico: e.target.value})} className="input-field" list="tecnicos-mant" placeholder="Selecciona o escribe uno nuevo" />
+              <datalist id="tecnicos-mant">
+                {tecnicos.map(t => <option key={t} value={t} />)}
+              </datalist>
             </div>
             <div>
               <label className="label-field">Descripción</label>
@@ -197,12 +212,20 @@ export default function Mantenimientos() {
                     <IconWrench className="h-4.5 w-4.5" />
                   </span>
                   <div className="min-w-0">
-                    <h2 className="font-medium text-slate-900">{p.equipos?.nombre}</h2>
-                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                      <span className="text-slate-500 text-sm">{p.tipo}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="font-medium text-slate-900">{p.equipos?.nombre}</h2>
                       <span className="badge-slate">{p.frecuencia}</span>
                     </div>
-                    {p.tecnico && <p className="text-slate-500 text-sm mt-1">Técnico: {p.tecnico}</p>}
+                    <span className="text-slate-500 text-sm">{p.tipo}</span>
+                    {p.descripcion && <p className="text-slate-500 text-sm mt-1">{p.descripcion}</p>}
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-slate-500">
+                      {p.tecnico && (
+                        <span className="inline-flex items-center gap-1"><IconUser className="h-3.5 w-3.5" /> {p.tecnico}</span>
+                      )}
+                      {p.equipos?.ubicacion && (
+                        <span className="inline-flex items-center gap-1"><IconMapPin className="h-3.5 w-3.5" /> {p.equipos.ubicacion}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">

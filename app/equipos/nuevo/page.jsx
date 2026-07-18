@@ -1,9 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { IconBox, IconTag, IconShieldCheck, IconFileText, IconAlertTriangle } from '../../components/Icons'
+import Campo from '../../components/CampoFormulario'
 
 export default function NuevoEquipo() {
   const router = useRouter()
@@ -23,6 +24,25 @@ export default function NuevoEquipo() {
   })
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
+  const [sugerencias, setSugerencias] = useState({ marca: [], ubicacion: [], responsable: [], proveedor: [] })
+
+  useEffect(() => {
+    async function cargarSugerencias() {
+      const { data, error } = await supabase.from('equipos').select('marca, ubicacion, responsable, proveedor')
+      if (error) {
+        console.error('Error cargando sugerencias:', error)
+        return
+      }
+      const unicos = (campo) => [...new Set((data || []).map(e => e[campo]).filter(Boolean))].sort()
+      setSugerencias({
+        marca: unicos('marca'),
+        ubicacion: unicos('ubicacion'),
+        responsable: unicos('responsable'),
+        proveedor: unicos('proveedor'),
+      })
+    }
+    cargarSugerencias()
+  }, [])
 
   function actualizar(campo, valor) {
     setForm({ ...form, [campo]: valor })
@@ -80,11 +100,11 @@ export default function NuevoEquipo() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Campo etiqueta="Nombre" valor={form.nombre} onChange={(v) => actualizar('nombre', v)} />
-            <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} />
+            <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} sugerencias={sugerencias.marca} />
             <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} />
             <Campo etiqueta="Serial" valor={form.serial} onChange={(v) => actualizar('serial', v)} />
-            <Campo etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)} />
-            <Campo etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} />
+            <Campo etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)} sugerencias={sugerencias.ubicacion} />
+            <Campo etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} sugerencias={sugerencias.responsable} />
             <Campo tipo="select" etiqueta="Estado" valor={form.estado} onChange={(v) => actualizar('estado', v)}>
               <option value="operativo">Operativo</option>
               <option value="mantenimiento">En mantenimiento</option>
@@ -100,7 +120,7 @@ export default function NuevoEquipo() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Campo tipo="date" etiqueta="Fecha de compra" valor={form.fecha_compra} onChange={(v) => actualizar('fecha_compra', v)} />
-            <Campo etiqueta="Proveedor" valor={form.proveedor} onChange={(v) => actualizar('proveedor', v)} />
+            <Campo etiqueta="Proveedor" valor={form.proveedor} onChange={(v) => actualizar('proveedor', v)} sugerencias={sugerencias.proveedor} />
             <Campo tipo="date" etiqueta="Garantía hasta" valor={form.garantia_hasta} onChange={(v) => actualizar('garantia_hasta', v)} />
             <Campo tipo="number" etiqueta="Costo de compra" valor={form.costo_compra} onChange={(v) => actualizar('costo_compra', v)} />
           </div>
@@ -126,26 +146,6 @@ export default function NuevoEquipo() {
           </button>
         </div>
       </div>
-    </div>
-  )
-}
-
-function Campo({ etiqueta, valor, onChange, tipo = 'text', children }) {
-  return (
-    <div>
-      <label className="label-field">{etiqueta}</label>
-      {tipo === 'select' ? (
-        <select value={valor} onChange={(e) => onChange(e.target.value)} className="input-field">
-          {children}
-        </select>
-      ) : (
-        <input
-          type={tipo}
-          value={valor}
-          onChange={(e) => onChange(e.target.value)}
-          className="input-field"
-        />
-      )}
     </div>
   )
 }

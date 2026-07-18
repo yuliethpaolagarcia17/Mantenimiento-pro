@@ -8,6 +8,7 @@ import {
   IconWrench, IconTag, IconBox, IconMapPin, IconUser, IconCalendar,
   IconBuilding, IconShieldCheck, IconDollarSign, IconFileText, IconEdit, IconTrash, IconClock
 } from '../../components/Icons'
+import HistorialItem from '../../components/HistorialItem'
 
 export default function HojaVida({ params }) {
   const { id } = use(params)
@@ -146,27 +147,9 @@ export default function HojaVida({ params }) {
             {historial.length === 0 ? (
               <p className="text-slate-500 text-sm">Este equipo no tiene mantenimientos registrados.</p>
             ) : (
-              <div className="relative flex flex-col gap-4 pl-1">
-                {historial.map((h, i) => (
-                  <div key={h.id} className="relative pl-6">
-                    {i !== historial.length - 1 && (
-                      <span className="absolute left-[5px] top-4 bottom-[-16px] w-px bg-slate-200" />
-                    )}
-                    <span className="absolute left-0 top-1.5 h-2.5 w-2.5 rounded-full bg-indigo-500 ring-4 ring-indigo-100" />
-                    <div className="bg-slate-50/70 rounded-xl p-4 flex justify-between items-start gap-4 hover:bg-indigo-50/50 transition-colors">
-                      <div className="min-w-0">
-                        <p className="font-medium text-slate-900 text-sm">{h.tipo}</p>
-                        {h.tecnico && <p className="text-sm text-slate-500 mt-0.5">Técnico: {h.tecnico}</p>}
-                        {h.descripcion && <p className="text-sm text-slate-500 mt-0.5">{h.descripcion}</p>}
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="badge-indigo">
-                          {new Date(h.fecha).toLocaleDateString('es-CO')}
-                        </span>
-                        {h.costo && <p className="text-emerald-600 font-medium mt-1 text-sm">${h.costo}</p>}
-                      </div>
-                    </div>
-                  </div>
+              <div className="flex flex-col gap-3">
+                {historial.map(h => (
+                  <HistorialItem key={h.id} registro={h} ubicacion={equipo.ubicacion} />
                 ))}
               </div>
             )}

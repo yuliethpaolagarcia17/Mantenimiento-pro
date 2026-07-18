@@ -1,8 +1,10 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { IconPlus, IconInbox, IconClock, IconX, IconAlertTriangle, IconTrash } from '../components/Icons'
+import { TIPOS_MANTENIMIENTO } from '@/lib/constantes'
+import { IconPlus, IconInbox, IconX, IconAlertTriangle } from '../components/Icons'
+import HistorialItem from '../components/HistorialItem'
 
 export default function Historial() {
   const [equipos, setEquipos] = useState([])
@@ -29,7 +31,7 @@ export default function Historial() {
   async function cargarHistorial() {
     const { data, error } = await supabase
       .from('historial_mantenimientos')
-      .select('*, equipos(nombre)')
+      .select('*, equipos(nombre, ubicacion)')
       .order('fecha', { ascending: false })
     if (error) console.error('Error cargando historial:', error)
     setHistorial(data || [])
@@ -64,6 +66,14 @@ export default function Historial() {
     cargarHistorial()
   }
 
+  const tecnicos = useMemo(() => {
+    const nombres = [
+      ...historial.map(h => h.tecnico),
+      ...equipos.map(e => e.responsable),
+    ].filter(Boolean)
+    return [...new Set(nombres)].sort()
+  }, [historial, equipos])
+
   return (
     <main className="max-w-4xl mx-auto p-4 sm:p-8 w-full">
       <div className="flex justify-between items-center mb-6 animate-fade-up">
@@ -88,30 +98,34 @@ export default function Historial() {
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label-field">Equipo</label>
+              <label className="label-field">Equipo (¿dónde?)</label>
               <select value={form.equipo_id}
                 onChange={e => setForm({...form, equipo_id: e.target.value})}
                 className="input-field">
                 <option value="">Seleccionar equipo</option>
                 {equipos.map(e => (
-                  <option key={e.id} value={e.id}>{e.nombre}</option>
+                  <option key={e.id} value={e.id}>{e.nombre}{e.ubicacion ? ` — ${e.ubicacion}` : ''}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="label-field">Tipo de mantenimiento</label>
-              <input value={form.tipo}
-                onChange={e => setForm({...form, tipo: e.target.value})}
-                className="input-field" />
+              <label className="label-field">Tipo de mantenimiento (¿qué?)</label>
+              <select value={form.tipo} onChange={e => setForm({...form, tipo: e.target.value})} className="input-field">
+                <option value="">Seleccionar tipo</option>
+                {TIPOS_MANTENIMIENTO.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
             </div>
             <div>
-              <label className="label-field">Técnico responsable</label>
+              <label className="label-field">Técnico responsable (¿quién?)</label>
               <input value={form.tecnico}
                 onChange={e => setForm({...form, tecnico: e.target.value})}
-                className="input-field" />
+                className="input-field" list="tecnicos-historial" placeholder="Selecciona o escribe uno nuevo" />
+              <datalist id="tecnicos-historial">
+                {tecnicos.map(t => <option key={t} value={t} />)}
+              </datalist>
             </div>
             <div>
-              <label className="label-field">Fecha</label>
+              <label className="label-field">Fecha (¿cuándo?)</label>
               <input type="date" value={form.fecha}
                 onChange={e => setForm({...form, fecha: e.target.value})}
                 className="input-field" />
@@ -126,7 +140,7 @@ export default function Historial() {
               <label className="label-field">Descripción</label>
               <input value={form.descripcion}
                 onChange={e => setForm({...form, descripcion: e.target.value})}
-                className="input-field" />
+                className="input-field" placeholder="Detalle de lo realizado" />
             </div>
           </div>
           <button onClick={guardar} disabled={guardando} className="btn btn-primary btn-md mt-5">
@@ -145,37 +159,8 @@ export default function Historial() {
       ) : (
         <div className="space-y-3">
           {historial.map((h, i) => (
-            <div
-              key={h.id}
-              className="card card-hover p-5 animate-fade-up"
-              style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
-            >
-              <div className="flex justify-between items-start gap-4">
-                <div className="flex items-start gap-3 min-w-0">
-                  <span className="icon-tile h-10 w-10 bg-indigo-50 text-indigo-600 shrink-0 mt-0.5">
-                    <IconClock className="h-4.5 w-4.5" />
-                  </span>
-                  <div className="min-w-0">
-                    <h2 className="font-medium text-slate-900">{h.equipos?.nombre}</h2>
-                    <p className="text-slate-600 text-sm mt-0.5">{h.tipo}</p>
-                    {h.tecnico && <p className="text-slate-500 text-sm">Técnico: {h.tecnico}</p>}
-                    {h.descripcion && <p className="text-slate-500 text-sm">{h.descripcion}</p>}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className="badge-indigo">
-                    {new Date(h.fecha).toLocaleDateString('es-CO')}
-                  </span>
-                  {h.costo && (
-                    <p className="text-emerald-600 font-medium mt-1 text-sm">${h.costo}</p>
-                  )}
-                  <button onClick={() => eliminar(h.id)}
-                    className="flex items-center gap-1 mt-2 text-rose-600 text-xs font-medium hover:underline ml-auto">
-                    <IconTrash className="h-3 w-3" />
-                    Eliminar
-                  </button>
-                </div>
-              </div>
+            <div key={h.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}>
+              <HistorialItem registro={h} mostrarEquipo onEliminar={eliminar} />
             </div>
           ))}
         </div>

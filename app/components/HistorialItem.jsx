@@ -1,39 +1,26 @@
-import { IconUser, IconCalendar, IconMapPin, IconClock, IconTrash } from './Icons'
+import { IconClock, IconTrash } from './Icons'
+
+function Fila({ label, valor, negrilla }) {
+  if (!valor) return null
+  return (
+    <div className="flex gap-2 text-sm">
+      <span className="w-28 shrink-0 text-slate-400">{label}:</span>
+      <span className={negrilla ? 'font-bold text-slate-900' : 'text-slate-700'}>{valor}</span>
+    </div>
+  )
+}
 
 export default function HistorialItem({ registro, mostrarEquipo = false, ubicacion, onEliminar }) {
   const lugar = ubicacion ?? registro.equipos?.ubicacion
 
   return (
     <div className="card card-hover p-5">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div className="flex items-start gap-3 min-w-0">
-          <span className="icon-tile h-10 w-10 bg-indigo-50 text-indigo-600 shrink-0 mt-0.5">
-            <IconClock className="h-4.5 w-4.5" />
+      <div className="flex items-start justify-between gap-4 mb-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="icon-tile h-9 w-9 bg-indigo-50 text-indigo-600 shrink-0">
+            <IconClock className="h-4 w-4" />
           </span>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              {mostrarEquipo && <h3 className="font-medium text-slate-900">{registro.equipos?.nombre}</h3>}
-              <span className="badge-indigo">{registro.tipo}</span>
-            </div>
-            {registro.descripcion && (
-              <p className="text-sm text-slate-600 mt-1.5 leading-relaxed">{registro.descripcion}</p>
-            )}
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-xs text-slate-500">
-              {registro.tecnico && (
-                <span className="inline-flex items-center gap-1">
-                  <IconUser className="h-3.5 w-3.5" /> {registro.tecnico}
-                </span>
-              )}
-              <span className="inline-flex items-center gap-1">
-                <IconCalendar className="h-3.5 w-3.5" /> {new Date(registro.fecha).toLocaleDateString('es-CO')}
-              </span>
-              {lugar && (
-                <span className="inline-flex items-center gap-1">
-                  <IconMapPin className="h-3.5 w-3.5" /> {lugar}
-                </span>
-              )}
-            </div>
-          </div>
+          {mostrarEquipo && <h3 className="font-medium text-slate-900 truncate">{registro.equipos?.nombre}</h3>}
         </div>
         <div className="text-right shrink-0 flex flex-col items-end gap-2">
           {registro.costo && <span className="badge-emerald">${registro.costo}</span>}
@@ -47,6 +34,13 @@ export default function HistorialItem({ registro, mostrarEquipo = false, ubicaci
             </button>
           )}
         </div>
+      </div>
+      <div className="pt-3 border-t border-slate-100 flex flex-col gap-1.5">
+        <Fila label="Tipo mant." valor={registro.tipo} negrilla />
+        <Fila label="Descripción" valor={registro.descripcion} />
+        <Fila label="Técnico" valor={registro.tecnico} />
+        <Fila label="Fecha" valor={new Date(registro.fecha).toLocaleDateString('es-CO')} />
+        <Fila label="Ubicación" valor={lugar} />
       </div>
     </div>
   )

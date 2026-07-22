@@ -104,7 +104,7 @@ export default function Historial() {
                 className="input-field">
                 <option value="">Seleccionar equipo</option>
                 {equipos.map(e => (
-                  <option key={e.id} value={e.id}>{e.nombre}{e.ubicacion ? ` — ${e.ubicacion}` : ''}</option>
+                  <option key={e.id} value={e.id}>{e.categoria ? `[${e.categoria}] ` : ''}{e.nombre}{e.ubicacion ? ` — ${e.ubicacion}` : ''}</option>
                 ))}
               </select>
             </div>

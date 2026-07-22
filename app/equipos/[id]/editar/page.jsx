@@ -3,8 +3,10 @@ import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { IconBox, IconTag, IconShieldCheck, IconFileText, IconAlertTriangle } from '../../../components/Icons'
+import { IconTag, IconShieldCheck, IconFileText, IconAlertTriangle } from '../../../components/Icons'
 import Campo from '../../../components/CampoFormulario'
+import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../../../components/CategoriaEquipo'
+import { CATEGORIAS_EQUIPO } from '@/lib/constantes'
 
 export default function EditarEquipo({ params }) {
   const { id } = use(params)
@@ -26,6 +28,7 @@ export default function EditarEquipo({ params }) {
         if (error) throw error
         setForm({
           nombre: data.nombre || '',
+          categoria: data.categoria || '',
           marca: data.marca || '',
           modelo: data.modelo || '',
           serial: data.serial || '',
@@ -99,6 +102,8 @@ export default function EditarEquipo({ params }) {
   }
   if (!form) return <p className="p-8 text-slate-400 text-sm">Equipo no encontrado</p>
 
+  const IconCategoria = ICONO_POR_CATEGORIA[form.categoria] || IconCategoriaDefault
+
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-8 w-full">
       <Link href={`/equipos/${id}`} className="text-sm text-slate-500 hover:text-slate-900 font-medium inline-flex items-center gap-1 group w-fit">
@@ -106,8 +111,8 @@ export default function EditarEquipo({ params }) {
       </Link>
 
       <div className="flex items-center gap-3 mt-4 mb-6 animate-fade-up">
-        <span className="icon-tile h-11 w-11 bg-brand-gradient text-white shadow-elevate shrink-0">
-          <IconBox className="h-5 w-5" />
+        <span className="icon-tile h-11 w-11 bg-brand-gradient text-white shadow-elevate shrink-0 transition-colors duration-200">
+          <IconCategoria className="h-5 w-5" />
         </span>
         <div>
           <h1 className="text-xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>Editar equipo</h1>
@@ -130,6 +135,10 @@ export default function EditarEquipo({ params }) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Campo etiqueta="Nombre" valor={form.nombre} onChange={(v) => actualizar('nombre', v)} />
+            <Campo tipo="select" etiqueta="Categoría" valor={form.categoria} onChange={(v) => actualizar('categoria', v)}>
+              <option value="">Seleccionar categoría</option>
+              {CATEGORIAS_EQUIPO.map(c => <option key={c} value={c}>{c}</option>)}
+            </Campo>
             <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} sugerencias={sugerencias.marca} />
             <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} />
             <Campo etiqueta="Serial" valor={form.serial} onChange={(v) => actualizar('serial', v)} />

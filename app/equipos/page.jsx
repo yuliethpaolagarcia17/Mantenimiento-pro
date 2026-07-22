@@ -2,7 +2,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { IconBox, IconPlus, IconInbox, IconArrowRight, IconSearch, IconMapPin } from '../components/Icons'
+import { IconPlus, IconInbox, IconArrowRight, IconSearch, IconMapPin } from '../components/Icons'
+import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../components/CategoriaEquipo'
 
 const FILTROS = [
   { value: 'todos', label: 'Todos' },
@@ -50,7 +51,7 @@ export default function Equipos() {
       const coincideFiltro = filtro === 'todos' || eq.estado === filtro
       if (!coincideFiltro) return false
       if (!q) return true
-      return [eq.nombre, eq.marca, eq.modelo, eq.ubicacion].some(v => (v || '').toLowerCase().includes(q))
+      return [eq.nombre, eq.marca, eq.modelo, eq.ubicacion, eq.categoria].some(v => (v || '').toLowerCase().includes(q))
     })
   }, [equipos, busqueda, filtro])
 
@@ -122,33 +123,39 @@ export default function Equipos() {
         </div>
       ) : (
         <div className="space-y-3">
-          {equiposFiltrados.map((eq, i) => (
-            <Link
-              key={eq.id}
-              href={`/equipos/${eq.id}`}
-              className="card card-hover flex items-center gap-4 p-5 group animate-fade-up"
-              style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
-            >
-              <span className={`icon-tile h-11 w-11 shrink-0 transition-transform duration-200 group-hover:scale-110 ${estadoIconBg(eq.estado)}`}>
-                <IconBox className="h-5 w-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-base font-medium text-slate-900 truncate">{eq.nombre}</p>
-                <p className="text-sm text-slate-500 truncate flex items-center gap-1 mt-0.5">
-                  {eq.marca} · {eq.modelo}
-                  {eq.ubicacion && (
-                    <span className="inline-flex items-center gap-0.5 text-slate-400">
-                      <IconMapPin className="h-3 w-3 shrink-0" /> {eq.ubicacion}
-                    </span>
-                  )}
-                </p>
-              </div>
-              <span className={`shrink-0 ${estadoBadge(eq.estado)}`}>
-                {eq.estado}
-              </span>
-              <IconArrowRight className="h-4 w-4 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all shrink-0 hidden sm:block" />
-            </Link>
-          ))}
+          {equiposFiltrados.map((eq, i) => {
+            const IconCategoria = ICONO_POR_CATEGORIA[eq.categoria] || IconCategoriaDefault
+            return (
+              <Link
+                key={eq.id}
+                href={`/equipos/${eq.id}`}
+                className="card card-hover flex items-center gap-4 p-5 group animate-fade-up"
+                style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
+              >
+                <span className={`icon-tile h-11 w-11 shrink-0 transition-transform duration-200 group-hover:scale-110 ${estadoIconBg(eq.estado)}`}>
+                  <IconCategoria className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-base font-medium text-slate-900 truncate">{eq.nombre}</p>
+                    {eq.categoria && <span className="badge-slate shrink-0">{eq.categoria}</span>}
+                  </div>
+                  <p className="text-sm text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                    {eq.marca} · {eq.modelo}
+                    {eq.ubicacion && (
+                      <span className="inline-flex items-center gap-0.5 text-slate-400">
+                        <IconMapPin className="h-3 w-3 shrink-0" /> {eq.ubicacion}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <span className={`shrink-0 ${estadoBadge(eq.estado)}`}>
+                  {eq.estado}
+                </span>
+                <IconArrowRight className="h-4 w-4 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all shrink-0 hidden sm:block" />
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>

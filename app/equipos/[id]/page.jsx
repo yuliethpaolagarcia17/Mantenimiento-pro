@@ -9,6 +9,7 @@ import {
   IconBuilding, IconShieldCheck, IconDollarSign, IconFileText, IconEdit, IconTrash, IconClock
 } from '../../components/Icons'
 import HistorialItem from '../../components/HistorialItem'
+import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../../components/CategoriaEquipo'
 
 export default function HojaVida({ params }) {
   const { id } = use(params)
@@ -84,6 +85,8 @@ export default function HojaVida({ params }) {
   const urlEquipo =
     typeof window !== 'undefined' ? window.location.href : ''
 
+  const IconCategoria = ICONO_POR_CATEGORIA[equipo.categoria] || IconCategoriaDefault
+
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-8 w-full">
       <Link href="/equipos" className="text-sm text-slate-500 hover:text-slate-900 font-medium inline-flex items-center gap-1 group w-fit">
@@ -96,11 +99,11 @@ export default function HojaVida({ params }) {
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="flex items-start gap-4">
                 <span className="icon-tile h-12 w-12 bg-brand-gradient text-white shadow-elevate shrink-0">
-                  <IconBox className="h-5.5 w-5.5" />
+                  <IconCategoria className="h-5.5 w-5.5" />
                 </span>
                 <div>
                   <h1 className="text-2xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>{equipo.nombre}</h1>
-                  <p className="text-slate-500 mt-0.5 text-sm">Hoja de vida del equipo</p>
+                  <p className="text-slate-500 mt-0.5 text-sm">{equipo.categoria || 'Hoja de vida del equipo'}</p>
                 </div>
               </div>
               <span className={`shrink-0 inline-flex items-center gap-1.5 ${estadoBadge}`}>
@@ -110,6 +113,7 @@ export default function HojaVida({ params }) {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+              <Dato icon={IconCategoria} etiqueta="Categoría" valor={equipo.categoria || 'No registrada'} />
               <Dato icon={IconTag} etiqueta="Marca" valor={equipo.marca} />
               <Dato icon={IconBox} etiqueta="Modelo" valor={equipo.modelo} />
               <Dato icon={IconFileText} etiqueta="Serial" valor={equipo.serial} />

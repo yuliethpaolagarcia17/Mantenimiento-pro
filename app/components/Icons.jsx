@@ -314,3 +314,98 @@ export function IconChevronLeft(props) {
     </svg>
   )
 }
+
+export function IconMonitor(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3.5" y="4" width="17" height="11" rx="1.5" />
+      <path d="M9 19h6M12 15v4" />
+    </svg>
+  )
+}
+
+export function IconLaptop(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="4" y="4.5" width="16" height="10.5" rx="1.2" />
+      <path d="M2.5 19.5h19l-1.5-3h-16l-1.5 3Z" />
+    </svg>
+  )
+}
+
+export function IconTv(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="2.5" y="4" width="19" height="12" rx="1.5" />
+      <path d="M8.5 19.5h7M9 16l-1 3.5M15 16l1 3.5" />
+    </svg>
+  )
+}
+
+export function IconProjector(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="7" width="14" height="8" rx="2" />
+      <circle cx="17.5" cy="11" r="2.3" />
+      <path d="M6.5 7V5.5M11 7V5.5" />
+    </svg>
+  )
+}
+
+export function IconSmartphone(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="7" y="2.5" width="10" height="19" rx="2" />
+      <path d="M11 19h2" />
+    </svg>
+  )
+}
+
+export function IconPrinter(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M6.5 8V3.5h11V8" />
+      <rect x="4" y="8" width="16" height="8" rx="1.5" />
+      <rect x="7" y="14.5" width="10" height="7" rx="1" />
+    </svg>
+  )
+}
+
+export function IconSnowflake(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 2.5v19M4 6.5l16 11M20 6.5 4 17.5" />
+    </svg>
+  )
+}
+
+export function IconWifi(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3.5 9.5a13 13 0 0 1 17 0" />
+      <path d="M6.5 13a9 9 0 0 1 11 0" />
+      <path d="M9.5 16.5a5 5 0 0 1 5 0" />
+      <circle cx="12" cy="20" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+export function IconCamera(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="2.5" y="9" width="12" height="7" rx="2" />
+      <path d="M14.5 11.5 21 9v7l-6.5-2.5" />
+      <circle cx="7" cy="12.5" r="1.6" />
+    </svg>
+  )
+}
+
+export function IconSpeaker(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="5" y="2.5" width="14" height="19" rx="2.5" />
+      <circle cx="12" cy="8" r="2.3" />
+      <circle cx="12" cy="16" r="3.3" />
+    </svg>
+  )
+}

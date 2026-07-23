@@ -94,8 +94,8 @@ export default function EscanearQR() {
   return (
     <main className="max-w-2xl mx-auto p-4 sm:p-8 w-full">
       <div className="mb-6 animate-fade-up">
-        <h1 className="text-2xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>Escanear QR</h1>
-        <p className="text-slate-500 mt-1">Apunta la cámara al código QR de un equipo para abrir su hoja de vida al instante.</p>
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Escanear QR</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">Apunta la cámara al código QR de un equipo para abrir su hoja de vida al instante.</p>
       </div>
 
       <div className="card overflow-hidden animate-fade-up" style={{ animationDelay: '0.05s' }}>

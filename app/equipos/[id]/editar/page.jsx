@@ -15,6 +15,7 @@ export default function EditarEquipo({ params }) {
   const [cargando, setCargando] = useState(true)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
+  const [errorNombre, setErrorNombre] = useState('')
   const [sugerencias, setSugerencias] = useState({ marca: [], modelo: [], ubicacion: [], responsable: [], proveedor: [] })
 
   useEffect(() => {
@@ -68,13 +69,16 @@ export default function EditarEquipo({ params }) {
 
   function actualizar(campo, valor) {
     setForm({ ...form, [campo]: valor })
+    if (campo === 'nombre') setErrorNombre('')
   }
 
   async function guardar() {
     if (!form.nombre.trim()) {
-      setError('El nombre del equipo es obligatorio.')
+      setErrorNombre('El nombre del equipo es obligatorio.')
+      setError('Completa los campos obligatorios antes de guardar.')
       return
     }
+    setErrorNombre('')
     setGuardando(true)
     setError('')
     try {
@@ -94,20 +98,20 @@ export default function EditarEquipo({ params }) {
   if (cargando) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="flex items-center gap-2.5 text-slate-400 text-sm">
-          <span className="h-4 w-4 rounded-full border-2 border-slate-200 border-t-indigo-500 animate-spin" />
+        <div className="flex items-center gap-2.5 text-slate-400 dark:text-slate-500 text-sm">
+          <span className="h-4 w-4 rounded-full border-2 border-slate-200 dark:border-slate-800 border-t-blue-500 animate-spin" />
           Cargando equipo...
         </div>
       </div>
     )
   }
-  if (!form) return <p className="p-8 text-slate-400 text-sm">Equipo no encontrado</p>
+  if (!form) return <p className="p-8 text-slate-400 dark:text-slate-500 text-sm">Equipo no encontrado</p>
 
   const IconCategoria = ICONO_POR_CATEGORIA[form.categoria] || IconCategoriaDefault
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-8 w-full">
-      <Link href={`/equipos/${id}`} className="text-sm text-slate-500 hover:text-slate-900 font-medium inline-flex items-center gap-1 group w-fit">
+      <Link href={`/equipos/${id}`} className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium inline-flex items-center gap-1 group w-fit">
         <span className="transition-transform duration-200 group-hover:-translate-x-0.5">←</span> Volver a la hoja de vida
       </Link>
 
@@ -116,13 +120,13 @@ export default function EditarEquipo({ params }) {
           <IconCategoria className="h-5 w-5" />
         </span>
         <div>
-          <h1 className="text-xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>Editar equipo</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Actualiza la información de {form.nombre || 'este equipo'}.</p>
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Editar equipo</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Actualiza la información de {form.nombre || 'este equipo'}.</p>
         </div>
       </div>
 
       {error && (
-        <p className="mb-5 text-rose-600 text-sm bg-rose-50 px-4 py-3 rounded-xl animate-fade-in flex items-center gap-2 ring-1 ring-inset ring-rose-600/10">
+        <p className="mb-5 text-rose-600 dark:text-rose-400 text-sm bg-rose-50 dark:bg-rose-950/40 px-4 py-3 rounded-xl animate-fade-in flex items-center gap-2 ring-1 ring-inset ring-rose-600/10 dark:ring-rose-400/20">
           <IconAlertTriangle className="h-4 w-4 shrink-0" />
           {error}
         </p>
@@ -131,11 +135,11 @@ export default function EditarEquipo({ params }) {
       <div className="flex flex-col gap-5">
         <section className="card p-6 sm:p-7 animate-fade-up">
           <div className="flex items-center gap-2 mb-5">
-            <IconTag className="h-4 w-4 text-indigo-500" />
-            <h2 className="text-sm font-semibold text-slate-900">Información general</h2>
+            <IconTag className="h-4 w-4 text-blue-500" />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Información general</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Campo etiqueta="Nombre" valor={form.nombre} onChange={(v) => actualizar('nombre', v)} />
+            <Campo etiqueta="Nombre" valor={form.nombre} onChange={(v) => actualizar('nombre', v)} requerido error={errorNombre} />
             <Campo tipo="select" etiqueta="Categoría" valor={form.categoria} onChange={(v) => actualizar('categoria', v)}>
               <option value="">Seleccionar categoría</option>
               {CATEGORIAS_EQUIPO.map(c => <option key={c} value={c}>{c}</option>)}
@@ -155,8 +159,8 @@ export default function EditarEquipo({ params }) {
 
         <section className="card p-6 sm:p-7 animate-fade-up" style={{ animationDelay: '0.05s' }}>
           <div className="flex items-center gap-2 mb-5">
-            <IconShieldCheck className="h-4 w-4 text-indigo-500" />
-            <h2 className="text-sm font-semibold text-slate-900">Compra y garantía</h2>
+            <IconShieldCheck className="h-4 w-4 text-blue-500" />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Compra y garantía</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Campo tipo="date" etiqueta="Fecha de compra" valor={form.fecha_compra} onChange={(v) => actualizar('fecha_compra', v)} />
@@ -168,8 +172,8 @@ export default function EditarEquipo({ params }) {
 
         <section className="card p-6 sm:p-7 animate-fade-up" style={{ animationDelay: '0.1s' }}>
           <div className="flex items-center gap-2 mb-5">
-            <IconFileText className="h-4 w-4 text-indigo-500" />
-            <h2 className="text-sm font-semibold text-slate-900">Notas</h2>
+            <IconFileText className="h-4 w-4 text-blue-500" />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Notas</h2>
           </div>
           <textarea
             value={form.notas}

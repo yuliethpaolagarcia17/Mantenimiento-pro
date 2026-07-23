@@ -63,14 +63,14 @@ export default function HojaVida({ params }) {
   if (cargando) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="flex items-center gap-2.5 text-slate-400 text-sm">
-          <span className="h-4 w-4 rounded-full border-2 border-slate-200 border-t-indigo-500 animate-spin" />
+        <div className="flex items-center gap-2.5 text-slate-400 dark:text-slate-500 text-sm">
+          <span className="h-4 w-4 rounded-full border-2 border-slate-200 dark:border-slate-800 border-t-blue-500 animate-spin" />
           Cargando equipo...
         </div>
       </div>
     )
   }
-  if (!equipo) return <p className="p-8 text-slate-400 text-sm">Equipo no encontrado</p>
+  if (!equipo) return <p className="p-8 text-slate-400 dark:text-slate-500 text-sm">Equipo no encontrado</p>
 
   const estadoBadge =
     equipo.estado === 'operativo' ? 'badge-emerald'
@@ -89,7 +89,7 @@ export default function HojaVida({ params }) {
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-8 w-full">
-      <Link href="/equipos" className="text-sm text-slate-500 hover:text-slate-900 font-medium inline-flex items-center gap-1 group w-fit">
+      <Link href="/equipos" className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium inline-flex items-center gap-1 group w-fit">
         <span className="transition-transform duration-200 group-hover:-translate-x-0.5">←</span> Volver a equipos
       </Link>
 
@@ -102,8 +102,8 @@ export default function HojaVida({ params }) {
                   <IconCategoria className="h-5.5 w-5.5" />
                 </span>
                 <div>
-                  <h1 className="text-2xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>{equipo.nombre}</h1>
-                  <p className="text-slate-500 mt-0.5 text-sm">{equipo.categoria || 'Hoja de vida del equipo'}</p>
+                  <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>{equipo.nombre}</h1>
+                  <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-sm">{equipo.categoria || 'Hoja de vida del equipo'}</p>
                 </div>
               </div>
               <span className={`shrink-0 inline-flex items-center gap-1.5 ${estadoBadge}`}>
@@ -126,13 +126,13 @@ export default function HojaVida({ params }) {
             </div>
 
             {equipo.notas && (
-              <div className="mt-7 pt-6 border-t border-slate-100">
+              <div className="mt-7 pt-6 border-t border-slate-100 dark:border-slate-800/60">
                 <p className="section-eyebrow mb-2">Notas</p>
-                <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{equipo.notas}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{equipo.notas}</p>
               </div>
             )}
 
-            <div className="mt-7 pt-6 border-t border-slate-100 flex flex-wrap gap-3">
+            <div className="mt-7 pt-6 border-t border-slate-100 dark:border-slate-800/60 flex flex-wrap gap-3">
               <Link href={`/equipos/${id}/editar`} className="btn btn-primary btn-md">
                 <IconEdit className="h-4 w-4" />
                 Editar equipo
@@ -149,7 +149,7 @@ export default function HojaVida({ params }) {
               Historial de mantenimientos ({historial.length})
             </p>
             {historial.length === 0 ? (
-              <p className="text-slate-500 text-sm">Este equipo no tiene mantenimientos registrados.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Este equipo no tiene mantenimientos registrados.</p>
             ) : (
               <div className="flex flex-col gap-3">
                 {historial.map(h => (
@@ -162,24 +162,24 @@ export default function HojaVida({ params }) {
 
         <div className="flex flex-col gap-6">
           <div className="card p-6 flex flex-col items-center text-center animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 uppercase tracking-wide mb-4">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 uppercase tracking-wide mb-4">
               <IconWrench className="h-3.5 w-3.5" />
               Código QR
             </div>
-            <div className="p-3 bg-white border border-slate-200 rounded-xl shrink-0 shadow-sm">
+            <div className="p-3 bg-white border border-slate-200 dark:border-slate-800 rounded-xl shrink-0 shadow-sm">
               <QRCodeCanvas value={urlEquipo} size={150} />
             </div>
-            <p className="text-sm text-slate-500 leading-relaxed mt-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-4">
               Escanéalo desde el celular para acceder de inmediato a esta hoja de vida, sin buscar papeles ni carpetas.
             </p>
           </div>
 
-          <div className="card p-6 bg-gradient-to-br from-indigo-600 to-violet-700 text-white animate-fade-up" style={{ animationDelay: '0.15s' }}>
+          <div className="card p-6 bg-gradient-to-br from-blue-600 to-cyan-700 text-white animate-fade-up" style={{ animationDelay: '0.15s' }}>
             <span className="icon-tile h-9 w-9 bg-white/15 ring-1 ring-white/20 mb-3">
               <IconClock className="h-4.5 w-4.5" />
             </span>
             <p className="font-medium text-sm">Próximo mantenimiento</p>
-            <p className="text-indigo-100/80 text-xs mt-1 leading-relaxed">
+            <p className="text-blue-100/80 text-xs mt-1 leading-relaxed">
               Consulta o programa el siguiente plan para este equipo desde la sección de mantenimientos.
             </p>
             <Link href="/mantenimientos" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold bg-white/15 hover:bg-white/25 transition-colors px-3 py-2 rounded-lg">
@@ -195,10 +195,10 @@ export default function HojaVida({ params }) {
 function Dato({ icon: Icon, etiqueta, valor }) {
   return (
     <div className="flex items-start gap-2.5">
-      <Icon className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+      <Icon className="h-4 w-4 text-slate-400 dark:text-slate-500 mt-0.5 shrink-0" />
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{etiqueta}</p>
-        <p className="text-sm text-slate-900 mt-0.5 truncate">{valor}</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{etiqueta}</p>
+        <p className="text-sm text-slate-900 dark:text-slate-100 mt-0.5 truncate">{valor}</p>
       </div>
     </div>
   )

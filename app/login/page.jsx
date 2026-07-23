@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { IconWrench, IconMail, IconLock, IconShieldCheck, IconBox, IconAlertTriangle } from '../components/Icons'
+import { IconWrench, IconMail, IconLock, IconShieldCheck, IconBox, IconAlertTriangle, IconAlertCircle } from '../components/Icons'
 
 const FEATURES = [
   { icon: IconBox, title: 'Hoja de vida por equipo', desc: 'Toda la información técnica y su historial, accesible con un código QR.' },
@@ -14,6 +14,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [errores, setErrores] = useState({})
 
   useEffect(() => {
     // Si llegamos aquí con ?logout=true, cerramos sesión
@@ -28,6 +29,15 @@ export default function Login() {
   }, [])
 
   async function handleLogin() {
+    const nuevosErrores = {
+      email: email.trim() ? '' : 'Ingresa tu correo electrónico.',
+      password: password ? '' : 'Ingresa tu contraseña.',
+    }
+    if (Object.values(nuevosErrores).some(Boolean)) {
+      setErrores(nuevosErrores)
+      return
+    }
+    setErrores({})
     setLoading(true)
     setError('')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -46,11 +56,11 @@ export default function Login() {
   return (
     <main className="min-h-screen grid lg:grid-cols-2 bg-slate-950">
       {/* Panel de marca */}
-      <div className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-800 to-violet-900 p-12 text-white">
+      <div className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-700 via-blue-800 to-cyan-900 p-12 text-white">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="animate-float absolute -top-24 -left-20 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
           <div className="animate-float absolute top-1/2 -right-24 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl" style={{ animationDelay: '2s' }} />
-          <div className="animate-float absolute -bottom-28 left-1/4 h-72 w-72 rounded-full bg-violet-400/20 blur-3xl" style={{ animationDelay: '4s' }} />
+          <div className="animate-float absolute -bottom-28 left-1/4 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" style={{ animationDelay: '4s' }} />
           <div
             className="absolute inset-0 opacity-[0.07]"
             style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)', backgroundSize: '28px 28px' }}
@@ -70,7 +80,7 @@ export default function Login() {
           <h1 className="text-4xl font-semibold leading-[1.15] tracking-tight max-w-md" style={{ fontFamily: 'var(--font-display)' }}>
             Mantenimiento preventivo, sin fricción.
           </h1>
-          <p className="mt-4 text-indigo-100/80 text-base max-w-sm leading-relaxed">
+          <p className="mt-4 text-blue-100/80 text-base max-w-sm leading-relaxed">
             Centraliza equipos, planes y trazabilidad en una sola plataforma pensada para equipos técnicos.
           </p>
 
@@ -82,14 +92,14 @@ export default function Login() {
                 </span>
                 <div>
                   <p className="font-medium text-white text-sm">{f.title}</p>
-                  <p className="text-indigo-100/70 text-sm mt-0.5 leading-relaxed">{f.desc}</p>
+                  <p className="text-blue-100/70 text-sm mt-0.5 leading-relaxed">{f.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="relative text-xs text-indigo-100/50 animate-fade-up" style={{ animationDelay: '0.4s' }}>
+        <p className="relative text-xs text-blue-100/50 animate-fade-up" style={{ animationDelay: '0.4s' }}>
           © {new Date().getFullYear()} MantenPro — Plataforma de mantenimiento preventivo
         </p>
       </div>
@@ -97,8 +107,8 @@ export default function Login() {
       {/* Panel de formulario */}
       <div className="relative flex items-center justify-center p-6 sm:p-10 bg-slate-50">
         <div className="pointer-events-none absolute inset-0 overflow-hidden lg:hidden">
-          <div className="animate-float absolute -top-20 -left-16 h-64 w-64 rounded-full bg-indigo-300/25 blur-3xl" />
-          <div className="animate-float absolute bottom-0 -right-16 h-64 w-64 rounded-full bg-violet-300/20 blur-3xl" style={{ animationDelay: '2s' }} />
+          <div className="animate-float absolute -top-20 -left-16 h-64 w-64 rounded-full bg-blue-300/25 blur-3xl" />
+          <div className="animate-float absolute bottom-0 -right-16 h-64 w-64 rounded-full bg-cyan-300/20 blur-3xl" style={{ animationDelay: '2s' }} />
         </div>
 
         <div className="relative w-full max-w-sm">
@@ -132,12 +142,13 @@ export default function Login() {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => { setEmail(e.target.value); setErrores({ ...errores, email: '' }) }}
                     onKeyDown={handleKeyDown}
                     placeholder="tu@correo.com"
-                    className="input-field pl-10"
+                    className={`input-field pl-10 ${errores.email ? 'input-field-error' : ''}`}
                   />
                 </div>
+                {errores.email && <p className="error-text"><IconAlertCircle className="h-3.5 w-3.5 shrink-0" />{errores.email}</p>}
               </div>
               <div>
                 <label className="label-field">Contraseña</label>
@@ -146,12 +157,13 @@ export default function Login() {
                   <input
                     type="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => { setPassword(e.target.value); setErrores({ ...errores, password: '' }) }}
                     onKeyDown={handleKeyDown}
                     placeholder="••••••••"
-                    className="input-field pl-10"
+                    className={`input-field pl-10 ${errores.password ? 'input-field-error' : ''}`}
                   />
                 </div>
+                {errores.password && <p className="error-text"><IconAlertCircle className="h-3.5 w-3.5 shrink-0" />{errores.password}</p>}
               </div>
               <button
                 onClick={handleLogin}

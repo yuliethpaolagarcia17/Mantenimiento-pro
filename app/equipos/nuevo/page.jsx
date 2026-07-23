@@ -27,11 +27,11 @@ export default function NuevoEquipo() {
   })
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
-  const [sugerencias, setSugerencias] = useState({ marca: [], ubicacion: [], responsable: [], proveedor: [] })
+  const [sugerencias, setSugerencias] = useState({ marca: [], modelo: [], ubicacion: [], responsable: [], proveedor: [] })
 
   useEffect(() => {
     async function cargarSugerencias() {
-      const { data, error } = await supabase.from('equipos').select('marca, ubicacion, responsable, proveedor')
+      const { data, error } = await supabase.from('equipos').select('marca, modelo, ubicacion, responsable, proveedor')
       if (error) {
         console.error('Error cargando sugerencias:', error)
         return
@@ -39,6 +39,7 @@ export default function NuevoEquipo() {
       const unicos = (campo) => [...new Set((data || []).map(e => e[campo]).filter(Boolean))].sort()
       setSugerencias({
         marca: unicos('marca'),
+        modelo: unicos('modelo'),
         ubicacion: unicos('ubicacion'),
         responsable: unicos('responsable'),
         proveedor: unicos('proveedor'),
@@ -110,7 +111,7 @@ export default function NuevoEquipo() {
               {CATEGORIAS_EQUIPO.map(c => <option key={c} value={c}>{c}</option>)}
             </Campo>
             <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} sugerencias={sugerencias.marca} />
-            <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} />
+            <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} sugerencias={sugerencias.modelo} />
             <Campo etiqueta="Serial" valor={form.serial} onChange={(v) => actualizar('serial', v)} />
             <Campo etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)} sugerencias={sugerencias.ubicacion} />
             <Campo etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} sugerencias={sugerencias.responsable} />

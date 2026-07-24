@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { TIPOS_MANTENIMIENTO, etiquetaEquipo } from '@/lib/constantes'
+import { TIPOS_MANTENIMIENTO } from '@/lib/constantes'
 import { IconPlus, IconInbox, IconX, IconAlertTriangle, IconAlertCircle } from '../components/Icons'
 import HistorialItem from '../components/HistorialItem'
 
@@ -112,7 +112,7 @@ export default function Historial() {
                 className={`input-field ${errores.equipo_id ? 'input-field-error' : ''}`}>
                 <option value="">Seleccionar equipo</option>
                 {equipos.map(e => (
-                  <option key={e.id} value={e.id}>{etiquetaEquipo(e)}</option>
+                  <option key={e.id} value={e.id}>{e.nombre}</option>
                 ))}
               </select>
               {errores.equipo_id && <p className="error-text"><IconAlertCircle className="h-3.5 w-3.5 shrink-0" />{errores.equipo_id}</p>}

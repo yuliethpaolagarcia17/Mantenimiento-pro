@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { IconTag, IconShieldCheck, IconFileText, IconAlertTriangle } from '../../../components/Icons'
 import Campo from '../../../components/CampoFormulario'
 import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../../../components/CategoriaEquipo'
-import { CATEGORIAS_EQUIPO } from '@/lib/constantes'
+import { CATEGORIAS_EQUIPO, UBICACIONES_EQUIPO } from '@/lib/constantes'
 
 export default function EditarEquipo({ params }) {
   const { id } = use(params)
@@ -16,7 +16,7 @@ export default function EditarEquipo({ params }) {
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
   const [errorNombre, setErrorNombre] = useState('')
-  const [sugerencias, setSugerencias] = useState({ marca: [], modelo: [], ubicacion: [], responsable: [], proveedor: [] })
+  const [sugerencias, setSugerencias] = useState({ marca: [], modelo: [], responsable: [], proveedor: [] })
 
   useEffect(() => {
     async function cargar() {
@@ -49,7 +49,7 @@ export default function EditarEquipo({ params }) {
       }
     }
     async function cargarSugerencias() {
-      const { data, error } = await supabase.from('equipos').select('marca, modelo, ubicacion, responsable, proveedor')
+      const { data, error } = await supabase.from('equipos').select('marca, modelo, responsable, proveedor')
       if (error) {
         console.error('Error cargando sugerencias:', error)
         return
@@ -58,7 +58,6 @@ export default function EditarEquipo({ params }) {
       setSugerencias({
         marca: unicos('marca'),
         modelo: unicos('modelo'),
-        ubicacion: unicos('ubicacion'),
         responsable: unicos('responsable'),
         proveedor: unicos('proveedor'),
       })
@@ -147,7 +146,10 @@ export default function EditarEquipo({ params }) {
             <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} sugerencias={sugerencias.marca} />
             <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} sugerencias={sugerencias.modelo} />
             <Campo etiqueta="Serial" valor={form.serial} onChange={(v) => actualizar('serial', v)} />
-            <Campo etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)} sugerencias={sugerencias.ubicacion} />
+            <Campo tipo="select" etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)}>
+              <option value="">Seleccionar ubicación</option>
+              {UBICACIONES_EQUIPO.map(u => <option key={u} value={u}>{u}</option>)}
+            </Campo>
             <Campo etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} sugerencias={sugerencias.responsable} />
             <Campo tipo="select" etiqueta="Estado" valor={form.estado} onChange={(v) => actualizar('estado', v)}>
               <option value="operativo">Operativo</option>

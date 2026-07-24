@@ -125,13 +125,16 @@ export default function Home() {
 
   const pct = (n: number) => (stats.total ? Math.round((n / stats.total) * 100) : 0)
 
-  const statCards = [
-    { label: 'Total equipos', value: stats.total, icon: IconLayers, iconClass: 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800', nota: 'equipos registrados', notaClass: 'text-slate-400 dark:text-slate-500' },
-    { label: 'Operativos', value: stats.operativos, icon: IconCheckCircle, iconClass: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40', nota: `${pct(stats.operativos)}% del total`, notaClass: 'text-emerald-600 dark:text-emerald-400' },
-    { label: 'En mantenimiento', value: stats.mantenimiento, icon: IconWrench, iconClass: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40', nota: `${pct(stats.mantenimiento)}% del total`, notaClass: 'text-amber-600 dark:text-amber-400' },
-    { label: 'Fuera de servicio', value: stats.fuera, icon: IconXCircle, iconClass: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40', nota: `${pct(stats.fuera)}% del total`, notaClass: 'text-rose-600 dark:text-rose-400' },
-    { label: 'Asignados', value: stats.asignados, icon: IconUser, iconClass: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40', nota: `${pct(stats.asignados)}% del total`, notaClass: 'text-blue-600 dark:text-blue-400' },
-    { label: 'Pendientes de revisión', value: stats.pendientes, icon: IconClock, iconClass: 'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40', nota: 'próximos 7 días', notaClass: 'text-cyan-600 dark:text-cyan-400' },
+  const heroCards = [
+    { label: 'Total equipos', value: stats.total, icon: IconLayers, gradient: 'from-slate-700 to-slate-900 dark:from-slate-600 dark:to-slate-800', glow: '#334155', nota: 'equipos registrados' },
+    { label: 'Operativos', value: stats.operativos, icon: IconCheckCircle, gradient: 'from-emerald-500 to-emerald-600', glow: '#10b981', nota: `${pct(stats.operativos)}% del total`, notaClass: 'text-emerald-600 dark:text-emerald-400' },
+    { label: 'Pendientes de revisión', value: stats.pendientes, icon: IconClock, gradient: 'from-cyan-500 to-cyan-600', glow: '#06b6d4', nota: 'próximos 7 días', notaClass: 'text-cyan-600 dark:text-cyan-400' },
+  ]
+
+  const secondaryCards = [
+    { label: 'En mantenimiento', value: stats.mantenimiento, icon: IconWrench, gradient: 'from-amber-500 to-amber-600', nota: `${pct(stats.mantenimiento)}%` },
+    { label: 'Fuera de servicio', value: stats.fuera, icon: IconXCircle, gradient: 'from-rose-500 to-rose-600', nota: `${pct(stats.fuera)}%` },
+    { label: 'Asignados', value: stats.asignados, icon: IconUser, gradient: 'from-blue-500 to-blue-600', nota: `${pct(stats.asignados)}%` },
   ]
 
   const distribucion = [
@@ -144,45 +147,89 @@ export default function Home() {
 
   return (
     <main className="max-w-6xl mx-auto p-4 sm:p-8 w-full">
-      <div className="mb-8 animate-fade-up">
-        <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Dashboard general</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">Resumen del estado de tus equipos · {MESES[hoy.getMonth()]} {hoy.getFullYear()}</p>
+      <div className="mb-8 animate-fade-up flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>
+            Dashboard <span className="text-brand-gradient">general</span>
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Resumen del estado de tus equipos · {MESES[hoy.getMonth()]} {hoy.getFullYear()}</p>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/15 dark:ring-emerald-400/20">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse-dot" />
+          Datos en vivo
+        </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        {statCards.map((card, i) => {
+      {/* Indicadores principales */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+        {heroCards.map((card, i) => {
           const Icon = card.icon
           return (
             <div
               key={card.label}
-              className="card card-hover group p-5 animate-fade-up"
-              style={{ animationDelay: `${i * 0.05}s` }}
+              className="card-premium card-premium-hover group p-6 animate-fade-up"
+              style={{ animationDelay: `${i * 0.06}s` }}
             >
-              <span className={`icon-tile h-9 w-9 mb-3 transition-transform duration-200 group-hover:scale-110 ${card.iconClass}`}>
-                <Icon className="h-4.5 w-4.5" />
+              <span className="glow-orb -top-10 -right-8 h-32 w-32" style={{ backgroundColor: card.glow }} />
+              <span className={`relative icon-tile h-11 w-11 mb-4 bg-gradient-to-br ${card.gradient} text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}>
+                <Icon className="h-5 w-5" />
               </span>
-              <div className="text-3xl font-semibold text-slate-900 dark:text-slate-100 tabular-nums" style={{ fontFamily: 'var(--font-display)' }}>
+              <div className="relative text-4xl sm:text-5xl font-semibold text-slate-900 dark:text-slate-100 tabular-nums leading-none" style={{ fontFamily: 'var(--font-display)' }}>
                 <AnimatedNumber value={card.value} />
               </div>
-              <div className="text-slate-500 dark:text-slate-400 text-sm mt-1">{card.label}</div>
-              <div className={`text-xs font-medium mt-2 ${card.notaClass}`}>{card.nota}</div>
+              <div className="relative text-slate-500 dark:text-slate-400 text-sm mt-2">{card.label}</div>
+              <div className={`relative text-xs font-medium mt-2 ${card.notaClass ?? 'text-slate-400 dark:text-slate-500'}`}>{card.nota}</div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Indicadores secundarios */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        {secondaryCards.map((card, i) => {
+          const Icon = card.icon
+          return (
+            <div
+              key={card.label}
+              className="card card-hover group flex items-center gap-4 p-4 animate-fade-up"
+              style={{ animationDelay: `${0.18 + i * 0.05}s` }}
+            >
+              <span className={`icon-tile h-10 w-10 shrink-0 bg-gradient-to-br ${card.gradient} text-white shadow-md transition-transform duration-300 group-hover:scale-110`}>
+                <Icon className="h-4.5 w-4.5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="text-xl font-semibold text-slate-900 dark:text-slate-100 tabular-nums" style={{ fontFamily: 'var(--font-display)' }}>
+                  <AnimatedNumber value={card.value} />
+                </div>
+                <div className="text-slate-500 dark:text-slate-400 text-xs truncate">{card.label}</div>
+              </div>
+              <span className="text-xs font-medium text-slate-400 dark:text-slate-500 shrink-0">{card.nota}</span>
             </div>
           )
         })}
       </div>
 
       {stats.total > 0 && (
-        <div className="card p-6 sm:p-7 mb-8 animate-fade-up flex flex-col sm:flex-row items-center gap-8">
-          <DonutChart data={distribucion} />
-          <div className="flex-1 w-full">
+        <div className="card-premium p-6 sm:p-7 mb-8 animate-fade-up flex flex-col sm:flex-row items-center gap-8">
+          <span className="glow-orb top-0 left-0 h-40 w-40" style={{ backgroundColor: '#2563eb' }} />
+          <DonutChart data={distribucion} size={176} thickness={22} centerValue={stats.total} centerLabel="equipos" />
+          <div className="relative flex-1 w-full">
             <h2 className="section-eyebrow mb-4">Distribución de equipos</h2>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               {distribucion.map(d => (
-                <div key={d.label} className="flex items-center gap-3">
-                  <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-                  <span className="text-sm text-slate-700 dark:text-slate-300 flex-1">{d.label}</span>
-                  <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 tabular-nums">{d.value}</span>
-                  <span className="text-xs text-slate-400 dark:text-slate-500 w-10 text-right tabular-nums">{pct(d.value)}%</span>
+                <div key={d.label} className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                    <span className="text-sm text-slate-700 dark:text-slate-300 flex-1">{d.label}</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 tabular-nums">{d.value}</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500 w-9 text-right tabular-nums">{pct(d.value)}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700 ease-out"
+                      style={{ width: `${pct(d.value)}%`, backgroundColor: d.color }}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -207,7 +254,7 @@ export default function Home() {
               <div
                 key={a.id}
                 className="card card-hover flex items-center gap-4 p-4 animate-fade-up"
-                style={{ animationDelay: `${0.1 + i * 0.04}s` }}
+                style={{ animationDelay: `${0.3 + i * 0.04}s` }}
               >
                 <span className={`icon-tile h-10 w-10 shrink-0 ${estilo.icono}`}>
                   <IconAlertTriangle className="h-4.5 w-4.5" />

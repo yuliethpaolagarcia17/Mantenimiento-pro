@@ -21,7 +21,7 @@ export default function AppShell({ children }) {
     localStorage.setItem('sidebar-colapsado', String(nuevo))
   }
 
-  if (pathname === '/login') return <>{children}</>
+  if (pathname === '/login' || pathname === '/reportes') return <>{children}</>
 
   return (
     <div className="flex min-h-screen w-full">

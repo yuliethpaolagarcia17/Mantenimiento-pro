@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { IconHome, IconBox, IconWrench, IconClock, IconQrCode, IconX, IconChevronLeft } from './Icons'
+import Logo from './Logo'
 
 const links = [
   { href: '/', label: 'Dashboard', icon: IconHome },
@@ -29,14 +30,7 @@ export default function Sidebar({ open, onClose, colapsado, onToggleColapso }) {
         } lg:translate-x-0`}
       >
         <div className={`flex items-center gap-2.5 px-5 h-16 border-b border-slate-100 dark:border-slate-800/60 shrink-0 ${colapsado ? 'lg:justify-center lg:px-0' : 'justify-between'}`}>
-          <Link href="/" className="flex items-center gap-2.5 group" onClick={onClose}>
-            <span className="bg-brand-gradient h-8 w-8 rounded-lg text-white flex items-center justify-center shrink-0 shadow-elevate transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3">
-              <IconWrench className="h-4 w-4" />
-            </span>
-            <span className={`font-semibold text-slate-900 dark:text-slate-100 tracking-tight ${ocultarEnDesktop}`} style={{ fontFamily: 'var(--font-display)' }}>
-              Manten<span className="text-brand-gradient">Pro</span>
-            </span>
-          </Link>
+          <Logo onClick={onClose} markClassName="h-8 w-8 rounded-lg" wordmarkClassName={ocultarEnDesktop} />
           <button onClick={onClose} className={`lg:hidden text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors ${colapsado ? 'hidden' : ''}`}>
             <IconX className="h-5 w-5" />
           </button>

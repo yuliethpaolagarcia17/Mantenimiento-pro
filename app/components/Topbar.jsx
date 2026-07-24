@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { IconMenu, IconBell, IconLogOut, IconSearch, IconBox, IconX } from './Icons'
+import { IconMenu, IconBell, IconLogOut, IconSearch, IconBox, IconX, IconPlus, IconFileText } from './Icons'
 import ThemeToggle from './ThemeToggle'
 
 export default function Topbar({ onMenuClick }) {
@@ -15,9 +15,17 @@ export default function Topbar({ onMenuClick }) {
   const [busquedaAbierta, setBusquedaAbierta] = useState(false)
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [notisAbiertas, setNotisAbiertas] = useState(false)
+  const [ahora, setAhora] = useState(null)
   const menuRef = useRef(null)
   const notisRef = useRef(null)
   const busquedaRef = useRef(null)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- la hora actual no se puede conocer en el servidor, se sincroniza al montar
+    setAhora(new Date())
+    const id = setInterval(() => setAhora(new Date()), 30000)
+    return () => clearInterval(id)
+  }, [])
 
   useEffect(() => {
     async function cargar() {
@@ -79,6 +87,11 @@ export default function Topbar({ onMenuClick }) {
   }
 
   const iniciales = email ? email.slice(0, 2).toUpperCase() : '··'
+  const fechaTexto = ahora ? (() => {
+    const f = ahora.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })
+    return f.charAt(0).toUpperCase() + f.slice(1)
+  })() : ''
+  const horaTexto = ahora ? ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : ''
 
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-4 h-16 px-4 sm:px-8 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shrink-0">
@@ -128,6 +141,31 @@ export default function Topbar({ onMenuClick }) {
           </div>
         )}
       </div>
+
+      {ahora && (
+        <div className="hidden xl:flex flex-col items-end leading-tight shrink-0 mr-1">
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 tabular-nums">{horaTexto}</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">{fechaTexto}</span>
+        </div>
+      )}
+
+      <Link
+        href="/equipos/nuevo"
+        className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 transition-colors shrink-0"
+        title="Registrar un nuevo equipo"
+      >
+        <IconPlus className="h-4 w-4" />
+        <span className="hidden lg:inline">Nuevo equipo</span>
+      </Link>
+
+      <Link
+        href="/reportes"
+        className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 transition-colors shrink-0"
+        title="Generar reporte de equipos"
+      >
+        <IconFileText className="h-4 w-4" />
+        <span className="hidden lg:inline">Reporte</span>
+      </Link>
 
       <div className="flex items-center gap-2">
         <ThemeToggle />

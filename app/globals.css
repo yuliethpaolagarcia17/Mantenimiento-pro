@@ -248,6 +248,18 @@ h1, h2, h3, h4 {
     @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-200/80 dark:hover:border-blue-800/80 hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_28px_-14px_rgba(37,99,235,0.25)];
   }
 
+  .card-premium {
+    @apply relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/70 dark:border-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_40px_-28px_rgba(15,23,42,0.18)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.2),0_20px_40px_-28px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out;
+  }
+
+  .card-premium-hover {
+    @apply hover:-translate-y-1 hover:shadow-[0_4px_10px_-2px_rgba(15,23,42,0.06),0_32px_56px_-24px_rgba(37,99,235,0.28)] dark:hover:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.3),0_32px_56px_-24px_rgba(37,99,235,0.35)];
+  }
+
+  .glow-orb {
+    @apply pointer-events-none absolute rounded-full blur-2xl opacity-[0.16] dark:opacity-[0.22];
+  }
+
   /* Forms */
   .input-field {
     @apply w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all duration-150 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:focus:ring-blue-500/20 focus:border-blue-400;

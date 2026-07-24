@@ -1,7 +1,7 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { IconWrench } from './Icons'
+import { IconLogoMark } from './Icons'
 
 export default function Footer() {
   const pathname = usePathname()
@@ -14,7 +14,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <span className="bg-brand-gradient h-7 w-7 rounded-lg text-white flex items-center justify-center shrink-0">
-            <IconWrench className="h-3.5 w-3.5" />
+            <IconLogoMark className="h-4 w-4" />
           </span>
           <div className="leading-tight">
             <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">MantenPro</p>

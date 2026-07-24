@@ -25,6 +25,16 @@ export function IconWrench(props) {
   )
 }
 
+export function IconLogoMark(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 2.4 20 6.8v10.4L12 21.6l-8-4.4V6.8L12 2.4Z" />
+      <path d="M14.6 8.9a2.6 2.6 0 0 0-3.5 3.5L8.3 15.2l1.3 1.3 2.8-2.8a2.6 2.6 0 0 0 3.5-3.5l-1.9 1.8-1.3-1.3 1.9-1.8Z" />
+      <circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 export function IconClock(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>

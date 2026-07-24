@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { IconWrench, IconMail, IconLock, IconShieldCheck, IconBox, IconAlertTriangle, IconAlertCircle } from '../components/Icons'
+import { IconLogoMark, IconMail, IconLock, IconShieldCheck, IconBox, IconAlertTriangle, IconAlertCircle } from '../components/Icons'
 
 const FEATURES = [
   { icon: IconBox, title: 'Hoja de vida por equipo', desc: 'Toda la información técnica y su historial, accesible con un código QR.' },
@@ -69,7 +69,7 @@ export default function Login() {
 
         <div className="relative flex items-center gap-2.5 animate-fade-up">
           <span className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-inner shadow-white/10 ring-1 ring-white/20">
-            <IconWrench className="h-5 w-5" />
+            <IconLogoMark className="h-5.5 w-5.5" />
           </span>
           <span className="text-xl font-semibold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
             MantenPro
@@ -114,7 +114,7 @@ export default function Login() {
         <div className="relative w-full max-w-sm">
           <div className="flex flex-col items-center mb-8 lg:hidden animate-fade-up">
             <div className="h-14 w-14 rounded-2xl bg-brand-gradient text-white flex items-center justify-center mb-4 shadow-elevate">
-              <IconWrench className="h-6 w-6" />
+              <IconLogoMark className="h-7 w-7" />
             </div>
             <h1 className="text-2xl font-semibold text-slate-900 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>MantenPro</h1>
             <p className="text-slate-500 mt-1 text-sm">Sistema de mantenimiento preventivo</p>

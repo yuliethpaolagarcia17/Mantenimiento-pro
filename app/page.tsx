@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { IconLayers, IconCheckCircle, IconWrench, IconXCircle, IconAlertTriangle, IconArrowRight, IconUser, IconClock, IconTrendUp, IconTag, IconMapPin, IconInbox } from './components/Icons'
+import { IconLayers, IconCheckCircle, IconWrench, IconXCircle, IconAlertTriangle, IconArrowRight, IconUser, IconClock, IconTrendUp, IconTag, IconMapPin, IconInbox, IconPlus, IconFileText, IconQrCode, IconCalendar } from './components/Icons'
 import DonutChart from './components/DonutChart'
 import BarList from './components/BarList'
 import AreaChart from './components/AreaChart'
@@ -138,23 +138,28 @@ export default function Home() {
     async function cargarTendenciaMensual() {
       const hoy = new Date()
       const inicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1)
-      const { data, error } = await supabase
-        .from('historial_mantenimientos')
-        .select('fecha')
-        .gte('fecha', inicio.toISOString().split('T')[0])
-      if (error) console.error('Error cargando tendencia:', error)
 
       const meses: { key: string; label: string; value: number }[] = []
       for (let i = 5; i >= 0; i--) {
         const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1)
         meses.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: MESES_CORTOS[d.getMonth()], value: 0 })
       }
-      ;(data || []).forEach(h => {
-        const f = new Date(h.fecha)
-        const key = `${f.getFullYear()}-${f.getMonth()}`
-        const mes = meses.find(m => m.key === key)
-        if (mes) mes.value += 1
-      })
+
+      try {
+        const { data, error } = await supabase
+          .from('historial_mantenimientos')
+          .select('fecha')
+          .gte('fecha', inicio.toISOString().split('T')[0])
+        if (error) throw error
+        ;(data || []).forEach(h => {
+          const f = new Date(h.fecha)
+          const key = `${f.getFullYear()}-${f.getMonth()}`
+          const mes = meses.find(m => m.key === key)
+          if (mes) mes.value += 1
+        })
+      } catch (e) {
+        console.error('Error cargando tendencia:', e)
+      }
       setTendenciaMensual(meses.map(({ label, value }) => ({ label, value })))
     }
 
@@ -233,6 +238,13 @@ export default function Home() {
   const hoy = new Date()
   const resumen = `Tienes ${stats.total} equipo${stats.total === 1 ? '' : 's'} registrado${stats.total === 1 ? '' : 's'}, ${stats.pendientes} con mantenimiento próximo${stats.fuera > 0 ? ` y ${stats.fuera} fuera de servicio` : ''}.`
 
+  const accesosRapidos = [
+    { label: 'Registrar equipo', href: '/equipos/nuevo', icon: IconPlus, iconClass: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40' },
+    { label: 'Programar mantenimiento', href: '/mantenimientos', icon: IconWrench, iconClass: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40' },
+    { label: 'Generar reporte PDF', href: '/reportes', icon: IconFileText, iconClass: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40' },
+    { label: 'Escanear QR', href: '/escanear', icon: IconQrCode, iconClass: 'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40' },
+  ]
+
   return (
     <main className="max-w-6xl mx-auto p-4 sm:p-8 w-full">
       <div className="mb-10 animate-fade-up flex items-start justify-between flex-wrap gap-3">
@@ -247,6 +259,26 @@ export default function Home() {
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse-dot" />
           Datos en vivo
         </span>
+      </div>
+
+      {/* Accesos rápidos */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
+        {accesosRapidos.map((accion, i) => {
+          const Icon = accion.icon
+          return (
+            <Link
+              key={accion.label}
+              href={accion.href}
+              className="card card-hover group flex flex-col sm:flex-row items-center sm:items-center gap-3 p-4 animate-fade-up text-center sm:text-left"
+              style={{ animationDelay: `${i * 0.04}s` }}
+            >
+              <span className={`icon-tile h-10 w-10 shrink-0 transition-transform duration-300 group-hover:scale-110 ${accion.iconClass}`}>
+                <Icon className="h-4.5 w-4.5" />
+              </span>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{accion.label}</span>
+            </Link>
+          )
+        })}
       </div>
 
       {/* Indicadores principales */}
@@ -366,6 +398,9 @@ export default function Home() {
 
       {alertas.length === 0 ? (
         <div className="card border-dashed p-8 text-center flex flex-col items-center animate-fade-up mb-10">
+          <span className="icon-tile h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 mb-3">
+            <IconCalendar className="h-4.5 w-4.5" />
+          </span>
           <p className="text-slate-500 dark:text-slate-400 text-sm">No hay mantenimientos programados para los próximos 7 días.</p>
         </div>
       ) : (

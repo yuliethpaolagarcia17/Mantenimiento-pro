@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { IconMenu, IconBell, IconLogOut, IconSearch, IconBox, IconX, IconPlus, IconFileText } from './Icons'
 import ThemeToggle from './ThemeToggle'
+import { obtenerPerfilActual } from '@/lib/perfil'
 
 export default function Topbar({ onMenuClick }) {
   const router = useRouter()
   const [email, setEmail] = useState('')
+  const [rol, setRol] = useState('')
   const [alertas, setAlertas] = useState([])
   const [equipos, setEquipos] = useState([])
   const [busqueda, setBusqueda] = useState('')
@@ -32,12 +34,16 @@ export default function Topbar({ onMenuClick }) {
       const { data: { session } } = await supabase.auth.getSession()
       setEmail(session?.user?.email || '')
 
+      const perfil = await obtenerPerfilActual()
+      setRol(perfil?.rol || '')
+
       const hoy = new Date()
       const en7dias = new Date()
       en7dias.setDate(hoy.getDate() + 7)
       const { data, error } = await supabase
         .from('planes_mantenimiento')
         .select('id, tipo, proxima_fecha, equipos(nombre)')
+        .eq('estado', 'activo')
         .lte('proxima_fecha', en7dias.toISOString().split('T')[0])
         .order('proxima_fecha', { ascending: true })
         .limit(5)
@@ -214,7 +220,10 @@ export default function Topbar({ onMenuClick }) {
           </button>
           {menuAbierto && (
             <div className="absolute right-0 mt-2 w-56 card shadow-elevate-lg p-2 animate-scale-in origin-top-right">
-              <p className="px-2.5 py-1.5 text-xs text-slate-400 dark:text-slate-500 truncate">{email}</p>
+              <div className="px-2.5 py-1.5">
+                <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{email}</p>
+                {rol && <span className="badge-blue mt-1.5">{rol}</span>}
+              </div>
               <button
                 onClick={cerrarSesion}
                 className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"

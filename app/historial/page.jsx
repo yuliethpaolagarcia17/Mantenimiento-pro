@@ -64,11 +64,20 @@ export default function Historial() {
     cargarHistorial()
   }
 
-  async function eliminar(id) {
-    if (!confirm('¿Eliminar este registro del historial?')) return
-    const { error } = await supabase.from('historial_mantenimientos').delete().eq('id', id)
+  async function anular(id) {
+    if (!confirm('¿Anular este registro del historial? Quedará registrado, pero marcado como anulado.')) return
+    const { error } = await supabase.from('historial_mantenimientos').update({ anulado: true }).eq('id', id)
     if (error) {
-      alert('No se pudo eliminar: ' + error.message)
+      alert('No se pudo anular: ' + error.message)
+      return
+    }
+    cargarHistorial()
+  }
+
+  async function revertir(id) {
+    const { error } = await supabase.from('historial_mantenimientos').update({ anulado: false }).eq('id', id)
+    if (error) {
+      alert('No se pudo revertir: ' + error.message)
       return
     }
     cargarHistorial()
@@ -171,7 +180,7 @@ export default function Historial() {
         <div className="space-y-3">
           {historial.map((h, i) => (
             <div key={h.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}>
-              <HistorialItem registro={h} mostrarEquipo onEliminar={eliminar} />
+              <HistorialItem registro={h} mostrarEquipo onAnular={anular} onRevertir={revertir} />
             </div>
           ))}
         </div>

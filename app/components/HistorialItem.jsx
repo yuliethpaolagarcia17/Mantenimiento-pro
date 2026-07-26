@@ -1,4 +1,4 @@
-import { IconClock, IconTrash } from './Icons'
+import { IconClock, IconArchive, IconRotateCcw } from './Icons'
 
 function Fila({ label, valor, negrilla }) {
   if (!valor) return null
@@ -10,28 +10,42 @@ function Fila({ label, valor, negrilla }) {
   )
 }
 
-export default function HistorialItem({ registro, mostrarEquipo = false, ubicacion, onEliminar }) {
+export default function HistorialItem({ registro, mostrarEquipo = false, ubicacion, onAnular, onRevertir }) {
   const lugar = ubicacion ?? registro.equipos?.ubicacion
+  const anulado = !!registro.anulado
 
   return (
-    <div className="card card-hover p-5">
+    <div className={`card card-hover p-5 ${anulado ? 'opacity-60' : ''}`}>
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="icon-tile h-9 w-9 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 shrink-0">
             <IconClock className="h-4 w-4" />
           </span>
           {mostrarEquipo && <h3 className="font-medium text-slate-900 dark:text-slate-100 truncate">{registro.equipos?.nombre}</h3>}
+          {anulado && <span className="badge-rose">Anulado</span>}
         </div>
         <div className="text-right shrink-0 flex flex-col items-end gap-2">
           {registro.costo && <span className="badge-emerald">${registro.costo}</span>}
-          {onEliminar && (
-            <button
-              onClick={() => onEliminar(registro.id)}
-              className="flex items-center gap-1 text-rose-600 text-xs font-medium hover:underline"
-            >
-              <IconTrash className="h-3 w-3" />
-              Eliminar
-            </button>
+          {anulado ? (
+            onRevertir && (
+              <button
+                onClick={() => onRevertir(registro.id)}
+                className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-xs font-medium hover:underline"
+              >
+                <IconRotateCcw className="h-3 w-3" />
+                Revertir
+              </button>
+            )
+          ) : (
+            onAnular && (
+              <button
+                onClick={() => onAnular(registro.id)}
+                className="flex items-center gap-1 text-rose-600 text-xs font-medium hover:underline"
+              >
+                <IconArchive className="h-3 w-3" />
+                Anular
+              </button>
+            )
           )}
         </div>
       </div>

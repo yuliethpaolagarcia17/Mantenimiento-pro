@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { IconTag, IconShieldCheck, IconFileText, IconAlertTriangle } from '../../components/Icons'
+import { IconTag, IconShieldCheck, IconFileText, IconAlertTriangle, IconCpu } from '../../components/Icons'
 import Campo from '../../components/CampoFormulario'
 import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../../components/CategoriaEquipo'
 import { CATEGORIAS_EQUIPO, UBICACIONES_EQUIPO } from '@/lib/constantes'
@@ -19,6 +19,9 @@ export default function NuevoEquipo() {
     ubicacion: '',
     responsable: '',
     estado: 'operativo',
+    ram: '',
+    sistema_operativo: '',
+    disco: '',
     fecha_compra: '',
     proveedor: '',
     garantia_hasta: '',
@@ -28,11 +31,11 @@ export default function NuevoEquipo() {
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
   const [errorNombre, setErrorNombre] = useState('')
-  const [sugerencias, setSugerencias] = useState({ marca: [], modelo: [], responsable: [], proveedor: [] })
+  const [sugerencias, setSugerencias] = useState({ marca: [], modelo: [], responsable: [], proveedor: [], ram: [], sistema_operativo: [], disco: [] })
 
   useEffect(() => {
     async function cargarSugerencias() {
-      const { data, error } = await supabase.from('equipos').select('marca, modelo, responsable, proveedor')
+      const { data, error } = await supabase.from('equipos').select('marca, modelo, responsable, proveedor, ram, sistema_operativo, disco')
       if (error) {
         console.error('Error cargando sugerencias:', error)
         return
@@ -43,6 +46,9 @@ export default function NuevoEquipo() {
         modelo: unicos('modelo'),
         responsable: unicos('responsable'),
         proveedor: unicos('proveedor'),
+        ram: unicos('ram'),
+        sistema_operativo: unicos('sistema_operativo'),
+        disco: unicos('disco'),
       })
     }
     cargarSugerencias()
@@ -130,6 +136,18 @@ export default function NuevoEquipo() {
         </section>
 
         <section className="card p-6 sm:p-7 animate-fade-up" style={{ animationDelay: '0.05s' }}>
+          <div className="flex items-center gap-2 mb-5">
+            <IconCpu className="h-4 w-4 text-blue-500" />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Especificaciones técnicas</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Campo etiqueta="RAM" valor={form.ram} onChange={(v) => actualizar('ram', v)} sugerencias={sugerencias.ram} />
+            <Campo etiqueta="Sistema operativo" valor={form.sistema_operativo} onChange={(v) => actualizar('sistema_operativo', v)} sugerencias={sugerencias.sistema_operativo} />
+            <Campo etiqueta="Disco" valor={form.disco} onChange={(v) => actualizar('disco', v)} sugerencias={sugerencias.disco} />
+          </div>
+        </section>
+
+        <section className="card p-6 sm:p-7 animate-fade-up" style={{ animationDelay: '0.08s' }}>
           <div className="flex items-center gap-2 mb-5">
             <IconShieldCheck className="h-4 w-4 text-blue-500" />
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Compra y garantía</h2>

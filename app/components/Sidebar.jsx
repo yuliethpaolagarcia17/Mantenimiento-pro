@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { IconHome, IconBox, IconWrench, IconClock, IconQrCode, IconX, IconChevronLeft } from './Icons'
+import { IconHome, IconBox, IconWrench, IconClock, IconQrCode, IconUsers, IconX, IconChevronLeft } from './Icons'
 import Logo from './Logo'
 
 const links = [
@@ -9,6 +9,7 @@ const links = [
   { href: '/equipos', label: 'Equipos', icon: IconBox },
   { href: '/mantenimientos', label: 'Plan de mant.', icon: IconWrench },
   { href: '/historial', label: 'Historial', icon: IconClock },
+  { href: '/usuarios', label: 'Usuarios', icon: IconUsers },
   { href: '/escanear', label: 'Escanear QR', icon: IconQrCode },
 ]
 

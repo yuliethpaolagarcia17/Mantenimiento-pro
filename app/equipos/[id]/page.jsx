@@ -2,22 +2,22 @@
 import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { QRCodeCanvas } from 'qrcode.react'
 import {
   IconWrench, IconTag, IconBox, IconMapPin, IconUser, IconCalendar,
-  IconBuilding, IconShieldCheck, IconDollarSign, IconFileText, IconEdit, IconTrash, IconClock
+  IconBuilding, IconShieldCheck, IconDollarSign, IconFileText, IconEdit, IconClock,
+  IconArchive, IconRotateCcw, IconDownload, IconCpu, IconHardDrive
 } from '../../components/Icons'
 import HistorialItem from '../../components/HistorialItem'
 import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../../components/CategoriaEquipo'
 
 export default function HojaVida({ params }) {
   const { id } = use(params)
-  const router = useRouter()
   const [equipo, setEquipo] = useState(null)
   const [historial, setHistorial] = useState([])
   const [cargando, setCargando] = useState(true)
-  const [eliminando, setEliminando] = useState(false)
+  const [actualizandoEstado, setActualizandoEstado] = useState(false)
+  const [generandoPDF, setGenerandoPDF] = useState(false)
 
   useEffect(() => {
     async function cargar() {
@@ -48,16 +48,120 @@ export default function HojaVida({ params }) {
     cargarHistorial()
   }, [id])
 
-  async function eliminar() {
-    if (!confirm('¿Eliminar este equipo? Esta acción no se puede deshacer.')) return
-    setEliminando(true)
-    const { error } = await supabase.from('equipos').delete().eq('id', id)
+  async function retirar() {
+    const estaRetirado = equipo.estado === 'retirado'
+    const mensaje = estaRetirado
+      ? '¿Reactivar este equipo?'
+      : '¿Retirar este equipo? Quedará registrado en la base de datos con su historial completo, pero dejará de figurar como activo.'
+    if (!confirm(mensaje)) return
+    setActualizandoEstado(true)
+    const nuevoEstado = estaRetirado ? 'operativo' : 'retirado'
+    const { error } = await supabase.from('equipos').update({ estado: nuevoEstado }).eq('id', id)
     if (error) {
-      alert('No se pudo eliminar: ' + error.message)
-      setEliminando(false)
+      alert('No se pudo actualizar el estado: ' + error.message)
+      setActualizandoEstado(false)
       return
     }
-    router.push('/equipos')
+    setEquipo({ ...equipo, estado: nuevoEstado })
+    setActualizandoEstado(false)
+  }
+
+  async function descargarPDF() {
+    setGenerandoPDF(true)
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF()
+      const margen = 15
+      let y = 20
+
+      function salto(alto = 7) {
+        y += alto
+        if (y > 280) {
+          doc.addPage()
+          y = 20
+        }
+      }
+      function titulo(texto) {
+        doc.setFontSize(13)
+        doc.setFont(undefined, 'bold')
+        doc.text(texto, margen, y)
+        doc.setFont(undefined, 'normal')
+        doc.setFontSize(10)
+        salto(8)
+      }
+      function fila(etiqueta, valor) {
+        doc.setTextColor(100)
+        doc.text(`${etiqueta}:`, margen, y)
+        doc.setTextColor(20)
+        doc.text(String(valor || 'No registrado'), margen + 45, y)
+        salto(6.5)
+      }
+
+      doc.setFontSize(17)
+      doc.setFont(undefined, 'bold')
+      doc.text('Hoja de vida del equipo', margen, y)
+      salto(9)
+      doc.setFontSize(11)
+      doc.setTextColor(80)
+      doc.text(equipo.nombre, margen, y)
+      doc.setTextColor(20)
+      salto(10)
+
+      titulo('Información general')
+      fila('Categoría', equipo.categoria)
+      fila('Marca', equipo.marca)
+      fila('Modelo', equipo.modelo)
+      fila('Serial', equipo.serial)
+      fila('Ubicación', equipo.ubicacion)
+      fila('Responsable', equipo.responsable)
+      fila('Estado', equipo.estado)
+      salto(4)
+
+      titulo('Especificaciones técnicas')
+      fila('RAM', equipo.ram)
+      fila('Sistema operativo', equipo.sistema_operativo)
+      fila('Disco', equipo.disco)
+      salto(4)
+
+      titulo('Compra y garantía')
+      fila('Fecha de compra', equipo.fecha_compra)
+      fila('Proveedor', equipo.proveedor)
+      fila('Garantía hasta', equipo.garantia_hasta)
+      fila('Costo de compra', equipo.costo_compra ? `$${equipo.costo_compra}` : '')
+      salto(4)
+
+      if (equipo.notas) {
+        titulo('Notas')
+        const lineas = doc.splitTextToSize(equipo.notas, 180)
+        doc.text(lineas, margen, y)
+        salto(lineas.length * 5.5 + 4)
+      }
+
+      titulo(`Historial de mantenimientos (${historial.length})`)
+      if (historial.length === 0) {
+        doc.setTextColor(100)
+        doc.text('Este equipo no tiene mantenimientos registrados.', margen, y)
+        doc.setTextColor(20)
+        salto(6.5)
+      } else {
+        historial.forEach(h => {
+          fila('Fecha', new Date(h.fecha).toLocaleDateString('es-CO'))
+          fila('Tipo', h.tipo)
+          fila('Técnico', h.tecnico)
+          if (h.descripcion) fila('Descripción', h.descripcion)
+          if (h.costo) fila('Costo', `$${h.costo}`)
+          doc.setDrawColor(220)
+          doc.line(margen, y - 2, 195, y - 2)
+          salto(3)
+        })
+      }
+
+      doc.save(`hoja-de-vida-${equipo.nombre.replace(/\s+/g, '-').toLowerCase()}.pdf`)
+    } catch (e) {
+      console.error('Error generando PDF:', e)
+      alert('No se pudo generar el PDF.')
+    }
+    setGenerandoPDF(false)
   }
 
   if (cargando) {
@@ -75,12 +179,16 @@ export default function HojaVida({ params }) {
   const estadoBadge =
     equipo.estado === 'operativo' ? 'badge-emerald'
     : equipo.estado === 'mantenimiento' ? 'badge-amber'
+    : equipo.estado === 'retirado' ? 'badge-slate'
     : 'badge-rose'
 
   const estadoDot =
     equipo.estado === 'operativo' ? 'bg-emerald-500'
     : equipo.estado === 'mantenimiento' ? 'bg-amber-500'
+    : equipo.estado === 'retirado' ? 'bg-slate-400'
     : 'bg-rose-500'
+
+  const estaRetirado = equipo.estado === 'retirado'
 
   const urlEquipo =
     typeof window !== 'undefined' ? window.location.href : ''
@@ -125,6 +233,17 @@ export default function HojaVida({ params }) {
               <Dato icon={IconDollarSign} etiqueta="Costo de compra" valor={equipo.costo_compra ? `$${equipo.costo_compra}` : 'No registrado'} />
             </div>
 
+            {(equipo.ram || equipo.sistema_operativo || equipo.disco) && (
+              <div className="mt-7 pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                <p className="section-eyebrow mb-4">Especificaciones técnicas</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+                  <Dato icon={IconCpu} etiqueta="RAM" valor={equipo.ram || 'No registrada'} />
+                  <Dato icon={IconBox} etiqueta="Sistema operativo" valor={equipo.sistema_operativo || 'No registrado'} />
+                  <Dato icon={IconHardDrive} etiqueta="Disco" valor={equipo.disco || 'No registrado'} />
+                </div>
+              </div>
+            )}
+
             {equipo.notas && (
               <div className="mt-7 pt-6 border-t border-slate-100 dark:border-slate-800/60">
                 <p className="section-eyebrow mb-2">Notas</p>
@@ -137,9 +256,13 @@ export default function HojaVida({ params }) {
                 <IconEdit className="h-4 w-4" />
                 Editar equipo
               </Link>
-              <button onClick={eliminar} disabled={eliminando} className="btn btn-danger-ghost btn-md">
-                <IconTrash className="h-4 w-4" />
-                {eliminando ? 'Eliminando...' : 'Eliminar equipo'}
+              <button onClick={descargarPDF} disabled={generandoPDF} className="btn btn-secondary btn-md">
+                <IconDownload className="h-4 w-4" />
+                {generandoPDF ? 'Generando...' : 'Descargar PDF'}
+              </button>
+              <button onClick={retirar} disabled={actualizandoEstado} className={`btn btn-md ${estaRetirado ? 'btn-secondary' : 'btn-danger-ghost'}`}>
+                {estaRetirado ? <IconRotateCcw className="h-4 w-4" /> : <IconArchive className="h-4 w-4" />}
+                {actualizandoEstado ? 'Actualizando...' : estaRetirado ? 'Reactivar equipo' : 'Retirar equipo'}
               </button>
             </div>
           </div>

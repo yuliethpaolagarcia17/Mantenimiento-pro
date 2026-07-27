@@ -7,6 +7,9 @@ import { IconTag, IconShieldCheck, IconFileText, IconAlertTriangle, IconCpu } fr
 import Campo from '../../../components/CampoFormulario'
 import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../../../components/CategoriaEquipo'
 import { CATEGORIAS_EQUIPO, UBICACIONES_EQUIPO } from '@/lib/constantes'
+import { obtenerPerfilActual } from '@/lib/perfil'
+import { puedeEditar } from '@/lib/permisos'
+import AccesoRestringido from '../../../components/AccesoRestringido'
 
 export default function EditarEquipo({ params }) {
   const { id } = use(params)
@@ -17,8 +20,14 @@ export default function EditarEquipo({ params }) {
   const [error, setError] = useState('')
   const [errorNombre, setErrorNombre] = useState('')
   const [sugerencias, setSugerencias] = useState({ marca: [], modelo: [], responsable: [], proveedor: [], ram: [], sistema_operativo: [], disco: [] })
+  const [rol, setRol] = useState(null)
 
   useEffect(() => {
+    async function cargarPerfil() {
+      const perfil = await obtenerPerfilActual()
+      setRol(perfil?.rol || '')
+    }
+    cargarPerfil()
     async function cargar() {
       try {
         const { data, error } = await supabase
@@ -111,6 +120,10 @@ export default function EditarEquipo({ params }) {
     )
   }
   if (!form) return <p className="p-8 text-slate-400 dark:text-slate-500 text-sm">Equipo no encontrado</p>
+
+  if (rol !== null && !puedeEditar(rol)) {
+    return <AccesoRestringido mensaje="Tu rol de Consulta solo permite ver la información, no editar equipos." />
+  }
 
   const IconCategoria = ICONO_POR_CATEGORIA[form.categoria] || IconCategoriaDefault
 

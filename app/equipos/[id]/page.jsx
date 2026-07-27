@@ -10,6 +10,8 @@ import {
 } from '../../components/Icons'
 import HistorialItem from '../../components/HistorialItem'
 import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../../components/CategoriaEquipo'
+import { obtenerPerfilActual } from '@/lib/perfil'
+import { puedeEditar, puedeAdministrar } from '@/lib/permisos'
 
 export default function HojaVida({ params }) {
   const { id } = use(params)
@@ -18,8 +20,14 @@ export default function HojaVida({ params }) {
   const [cargando, setCargando] = useState(true)
   const [actualizandoEstado, setActualizandoEstado] = useState(false)
   const [generandoPDF, setGenerandoPDF] = useState(false)
+  const [rol, setRol] = useState('')
 
   useEffect(() => {
+    async function cargarPerfil() {
+      const perfil = await obtenerPerfilActual()
+      setRol(perfil?.rol || '')
+    }
+    cargarPerfil()
     async function cargar() {
       try {
         const { data, error } = await supabase
@@ -252,18 +260,22 @@ export default function HojaVida({ params }) {
             )}
 
             <div className="mt-7 pt-6 border-t border-slate-100 dark:border-slate-800/60 flex flex-wrap gap-3">
-              <Link href={`/equipos/${id}/editar`} className="btn btn-primary btn-md">
-                <IconEdit className="h-4 w-4" />
-                Editar equipo
-              </Link>
+              {puedeEditar(rol) && (
+                <Link href={`/equipos/${id}/editar`} className="btn btn-primary btn-md">
+                  <IconEdit className="h-4 w-4" />
+                  Editar equipo
+                </Link>
+              )}
               <button onClick={descargarPDF} disabled={generandoPDF} className="btn btn-secondary btn-md">
                 <IconDownload className="h-4 w-4" />
                 {generandoPDF ? 'Generando...' : 'Descargar PDF'}
               </button>
-              <button onClick={retirar} disabled={actualizandoEstado} className={`btn btn-md ${estaRetirado ? 'btn-secondary' : 'btn-danger-ghost'}`}>
-                {estaRetirado ? <IconRotateCcw className="h-4 w-4" /> : <IconArchive className="h-4 w-4" />}
-                {actualizandoEstado ? 'Actualizando...' : estaRetirado ? 'Reactivar equipo' : 'Retirar equipo'}
-              </button>
+              {puedeAdministrar(rol) && (
+                <button onClick={retirar} disabled={actualizandoEstado} className={`btn btn-md ${estaRetirado ? 'btn-secondary' : 'btn-danger-ghost'}`}>
+                  {estaRetirado ? <IconRotateCcw className="h-4 w-4" /> : <IconArchive className="h-4 w-4" />}
+                  {actualizandoEstado ? 'Actualizando...' : estaRetirado ? 'Reactivar equipo' : 'Retirar equipo'}
+                </button>
+              )}
             </div>
           </div>
 

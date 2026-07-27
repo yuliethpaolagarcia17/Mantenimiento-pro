@@ -7,6 +7,9 @@ import { IconTag, IconShieldCheck, IconFileText, IconAlertTriangle, IconCpu } fr
 import Campo from '../../components/CampoFormulario'
 import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../../components/CategoriaEquipo'
 import { CATEGORIAS_EQUIPO, UBICACIONES_EQUIPO } from '@/lib/constantes'
+import { obtenerPerfilActual } from '@/lib/perfil'
+import { puedeEditar } from '@/lib/permisos'
+import AccesoRestringido from '../../components/AccesoRestringido'
 
 export default function NuevoEquipo() {
   const router = useRouter()
@@ -32,8 +35,14 @@ export default function NuevoEquipo() {
   const [error, setError] = useState('')
   const [errorNombre, setErrorNombre] = useState('')
   const [sugerencias, setSugerencias] = useState({ marca: [], modelo: [], responsable: [], proveedor: [], ram: [], sistema_operativo: [], disco: [] })
+  const [rol, setRol] = useState(null)
 
   useEffect(() => {
+    async function cargarPerfil() {
+      const perfil = await obtenerPerfilActual()
+      setRol(perfil?.rol || '')
+    }
+    cargarPerfil()
     async function cargarSugerencias() {
       const { data, error } = await supabase.from('equipos').select('marca, modelo, responsable, proveedor, ram, sistema_operativo, disco')
       if (error) {
@@ -83,6 +92,10 @@ export default function NuevoEquipo() {
   }
 
   const IconCategoria = ICONO_POR_CATEGORIA[form.categoria] || IconCategoriaDefault
+
+  if (rol !== null && !puedeEditar(rol)) {
+    return <AccesoRestringido mensaje="Tu rol de Consulta solo permite ver la información, no registrar equipos nuevos." />
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-8 w-full">

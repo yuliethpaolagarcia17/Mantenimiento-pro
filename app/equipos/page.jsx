@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { IconPlus, IconInbox, IconArrowRight, IconSearch, IconMapPin, IconEdit, IconChevronLeft } from '../components/Icons'
 import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../components/CategoriaEquipo'
+import { obtenerPerfilActual } from '@/lib/perfil'
+import { puedeEditar } from '@/lib/permisos'
 
 const FILTROS = [
   { value: 'todos', label: 'Todos' },
@@ -21,6 +23,7 @@ export default function Equipos() {
   const [busqueda, setBusqueda] = useState('')
   const [filtro, setFiltro] = useState('todos')
   const [pagina, setPagina] = useState(1)
+  const [rol, setRol] = useState('')
 
   useEffect(() => {
     async function cargar() {
@@ -34,7 +37,12 @@ export default function Equipos() {
         setCargando(false)
       }
     }
+    async function cargarPerfil() {
+      const perfil = await obtenerPerfilActual()
+      setRol(perfil?.rol || '')
+    }
     cargar()
+    cargarPerfil()
   }, [])
 
   function estadoBadge(estado) {
@@ -74,10 +82,12 @@ export default function Equipos() {
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Equipos</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{equipos.length} {equipos.length === 1 ? 'equipo registrado' : 'equipos registrados'}</p>
         </div>
-        <Link href="/equipos/nuevo" className="btn btn-primary btn-md">
-          <IconPlus className="h-4 w-4" />
-          Agregar equipo
-        </Link>
+        {puedeEditar(rol) && (
+          <Link href="/equipos/nuevo" className="btn btn-primary btn-md">
+            <IconPlus className="h-4 w-4" />
+            Agregar equipo
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6 animate-fade-up" style={{ animationDelay: '0.05s' }}>
@@ -121,10 +131,12 @@ export default function Equipos() {
             <IconInbox className="h-6 w-6" />
           </span>
           <p className="text-slate-500 dark:text-slate-400 text-sm">No hay equipos registrados todavía.</p>
-          <Link href="/equipos/nuevo" className="btn btn-primary btn-sm mt-4">
-            <IconPlus className="h-3.5 w-3.5" />
-            Agregar el primero
-          </Link>
+          {puedeEditar(rol) && (
+            <Link href="/equipos/nuevo" className="btn btn-primary btn-sm mt-4">
+              <IconPlus className="h-3.5 w-3.5" />
+              Agregar el primero
+            </Link>
+          )}
         </div>
       ) : equiposFiltrados.length === 0 ? (
         <div className="card border-dashed p-10 text-center flex flex-col items-center animate-fade-up">
@@ -174,9 +186,11 @@ export default function Equipos() {
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1">
-                          <Link href={`/equipos/${eq.id}/editar`} title="Editar" className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors">
-                            <IconEdit className="h-4 w-4" />
-                          </Link>
+                          {puedeEditar(rol) && (
+                            <Link href={`/equipos/${eq.id}/editar`} title="Editar" className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors">
+                              <IconEdit className="h-4 w-4" />
+                            </Link>
+                          )}
                           <Link href={`/equipos/${eq.id}`} title="Ver hoja de vida" className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors">
                             <IconArrowRight className="h-4 w-4" />
                           </Link>

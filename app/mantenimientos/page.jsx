@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { TIPOS_MANTENIMIENTO, etiquetaEquipo } from '@/lib/constantes'
 import { IconPlus, IconInbox, IconWrench, IconX, IconAlertTriangle, IconAlertCircle, IconCalendar, IconMapPin, IconUser, IconArchive, IconRotateCcw } from '../components/Icons'
+import { obtenerPerfilActual } from '@/lib/perfil'
+import { puedeEditar, puedeAdministrar } from '@/lib/permisos'
 
 const DIAS_POR_FRECUENCIA = {
   diario: 1,
@@ -23,10 +25,16 @@ export default function Mantenimientos() {
   const [error, setError] = useState('')
   const [errores, setErrores] = useState({})
   const [vista, setVista] = useState('activos')
+  const [rol, setRol] = useState('')
 
   useEffect(() => {
     cargarEquipos()
     cargarPlanes()
+    async function cargarPerfil() {
+      const perfil = await obtenerPerfilActual()
+      setRol(perfil?.rol || '')
+    }
+    cargarPerfil()
   }, [])
 
   async function cargarEquipos() {
@@ -150,10 +158,12 @@ export default function Mantenimientos() {
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Plan de mantenimiento</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{planesActivos.length} {planesActivos.length === 1 ? 'plan activo' : 'planes activos'}</p>
         </div>
-        <button onClick={() => setMostrarForm(!mostrarForm)} className="btn btn-primary btn-md">
-          {mostrarForm ? <IconX className="h-4 w-4" /> : <IconPlus className="h-4 w-4" />}
-          {mostrarForm ? 'Cerrar' : 'Agregar plan'}
-        </button>
+        {puedeEditar(rol) && (
+          <button onClick={() => setMostrarForm(!mostrarForm)} className="btn btn-primary btn-md">
+            {mostrarForm ? <IconX className="h-4 w-4" /> : <IconPlus className="h-4 w-4" />}
+            {mostrarForm ? 'Cerrar' : 'Agregar plan'}
+          </button>
+        )}
       </div>
 
       <div className="flex gap-1.5 mb-6 animate-fade-up">
@@ -280,16 +290,20 @@ export default function Mantenimientos() {
                   <div className="flex gap-1.5">
                     {vista === 'activos' ? (
                       <>
-                        <button onClick={() => completar(p)} className="btn btn-secondary btn-sm">
-                          Completar
-                        </button>
-                        <button onClick={() => cancelar(p.id)} className="btn btn-danger-ghost btn-sm">
-                          <IconArchive className="h-3.5 w-3.5" />
-                          Cancelar
-                        </button>
+                        {puedeEditar(rol) && (
+                          <button onClick={() => completar(p)} className="btn btn-secondary btn-sm">
+                            Completar
+                          </button>
+                        )}
+                        {puedeAdministrar(rol) && (
+                          <button onClick={() => cancelar(p.id)} className="btn btn-danger-ghost btn-sm">
+                            <IconArchive className="h-3.5 w-3.5" />
+                            Cancelar
+                          </button>
+                        )}
                       </>
                     ) : (
-                      p.estado === 'cancelado' && (
+                      p.estado === 'cancelado' && puedeAdministrar(rol) && (
                         <button onClick={() => reactivar(p.id)} className="btn btn-secondary btn-sm">
                           <IconRotateCcw className="h-3.5 w-3.5" />
                           Reactivar

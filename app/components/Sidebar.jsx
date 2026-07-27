@@ -1,21 +1,38 @@
 'use client'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { IconHome, IconBox, IconWrench, IconClock, IconQrCode, IconUsers, IconX, IconChevronLeft } from './Icons'
 import Logo from './Logo'
+import { obtenerPerfilActual } from '@/lib/perfil'
+import { puedeAdministrar } from '@/lib/permisos'
 
-const links = [
+const linksBase = [
   { href: '/', label: 'Dashboard', icon: IconHome },
   { href: '/equipos', label: 'Equipos', icon: IconBox },
   { href: '/mantenimientos', label: 'Plan de mant.', icon: IconWrench },
   { href: '/historial', label: 'Historial', icon: IconClock },
-  { href: '/usuarios', label: 'Usuarios', icon: IconUsers },
   { href: '/escanear', label: 'Escanear QR', icon: IconQrCode },
 ]
+
+const linkUsuarios = { href: '/usuarios', label: 'Usuarios', icon: IconUsers }
 
 export default function Sidebar({ open, onClose, colapsado, onToggleColapso }) {
   const pathname = usePathname()
   const ocultarEnDesktop = colapsado ? 'lg:hidden' : ''
+  const [rol, setRol] = useState('')
+
+  useEffect(() => {
+    async function cargarPerfil() {
+      const perfil = await obtenerPerfilActual()
+      setRol(perfil?.rol || '')
+    }
+    cargarPerfil()
+  }, [])
+
+  const links = puedeAdministrar(rol)
+    ? [...linksBase.slice(0, 4), linkUsuarios, linksBase[4]]
+    : linksBase
 
   return (
     <>

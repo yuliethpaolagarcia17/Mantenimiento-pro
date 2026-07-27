@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { TIPOS_MANTENIMIENTO } from '@/lib/constantes'
 import { IconPlus, IconInbox, IconX, IconAlertTriangle, IconAlertCircle } from '../components/Icons'
 import HistorialItem from '../components/HistorialItem'
+import { obtenerPerfilActual } from '@/lib/perfil'
+import { puedeEditar, puedeAdministrar } from '@/lib/permisos'
 
 export default function Historial() {
   const [equipos, setEquipos] = useState([])
@@ -17,10 +19,16 @@ export default function Historial() {
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
   const [errores, setErrores] = useState({})
+  const [rol, setRol] = useState('')
 
   useEffect(() => {
     cargarEquipos()
     cargarHistorial()
+    async function cargarPerfil() {
+      const perfil = await obtenerPerfilActual()
+      setRol(perfil?.rol || '')
+    }
+    cargarPerfil()
   }, [])
 
   async function cargarEquipos() {
@@ -98,10 +106,12 @@ export default function Historial() {
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Historial de mantenimientos</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{historial.length} {historial.length === 1 ? 'registro' : 'registros'}</p>
         </div>
-        <button onClick={() => setMostrarForm(!mostrarForm)} className="btn btn-primary btn-md">
-          {mostrarForm ? <IconX className="h-4 w-4" /> : <IconPlus className="h-4 w-4" />}
-          {mostrarForm ? 'Cerrar' : 'Registrar mantenimiento'}
-        </button>
+        {puedeEditar(rol) && (
+          <button onClick={() => setMostrarForm(!mostrarForm)} className="btn btn-primary btn-md">
+            {mostrarForm ? <IconX className="h-4 w-4" /> : <IconPlus className="h-4 w-4" />}
+            {mostrarForm ? 'Cerrar' : 'Registrar mantenimiento'}
+          </button>
+        )}
       </div>
 
       {mostrarForm && (
@@ -180,7 +190,12 @@ export default function Historial() {
         <div className="space-y-3">
           {historial.map((h, i) => (
             <div key={h.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}>
-              <HistorialItem registro={h} mostrarEquipo onAnular={anular} onRevertir={revertir} />
+              <HistorialItem
+                registro={h}
+                mostrarEquipo
+                onAnular={puedeAdministrar(rol) ? anular : undefined}
+                onRevertir={puedeAdministrar(rol) ? revertir : undefined}
+              />
             </div>
           ))}
         </div>

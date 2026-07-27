@@ -118,6 +118,7 @@ export default function Home() {
       const { data, error } = await supabase
         .from('planes_mantenimiento')
         .select('*, equipos(nombre, ubicacion)')
+        .eq('estado', 'activo')
         .lte('proxima_fecha', en7dias.toISOString().split('T')[0])
         .order('proxima_fecha', { ascending: true })
       if (error) console.error('Error cargando alertas:', error)
@@ -129,6 +130,7 @@ export default function Home() {
       const { data, error } = await supabase
         .from('historial_mantenimientos')
         .select('id, tipo, descripcion, tecnico, fecha, equipos(nombre)')
+        .eq('anulado', false)
         .order('fecha', { ascending: false })
         .limit(5)
       if (error) console.error('Error cargando actividad:', error)

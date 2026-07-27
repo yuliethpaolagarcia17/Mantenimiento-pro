@@ -8,6 +8,7 @@ const ESTADO_LABEL = {
   operativo: 'Operativo',
   mantenimiento: 'En mantenimiento',
   'fuera de servicio': 'Fuera de servicio',
+  retirado: 'Retirado',
 }
 
 export default function Reportes() {

@@ -447,6 +447,67 @@ export function IconMoon(props) {
   )
 }
 
+export function IconUsers(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M2.8 20c1.2-3.4 3.6-5.2 6.2-5.2s5 1.8 6.2 5.2" />
+      <path d="M16 8.2a3 3 0 1 1 3.2 3" />
+      <path d="M15.5 14.9c2.3.3 4 1.9 4.9 5.1h-1.9" />
+    </svg>
+  )
+}
+
+export function IconArchive(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="4" width="18" height="4.5" rx="1.2" />
+      <path d="M4.5 8.5V19a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V8.5" />
+      <path d="M10 13h4" />
+    </svg>
+  )
+}
+
+export function IconRotateCcw(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3.5 3.5v5.5h5.5" />
+      <path d="M4.4 15a8.5 8.5 0 1 0 1.8-9.1L3.5 9" />
+    </svg>
+  )
+}
+
+export function IconDownload(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 3.5v11.5" />
+      <path d="m7.5 11 4.5 4.5L16.5 11" />
+      <path d="M4.5 17v2.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V17" />
+    </svg>
+  )
+}
+
+export function IconCpu(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="7" y="7" width="10" height="10" rx="1.5" />
+      <rect x="10" y="10" width="4" height="4" />
+      <path d="M9 3.5V7M15 3.5V7M9 17v3.5M15 17v3.5M3.5 9H7M3.5 15H7M17 9h3.5M17 15h3.5" />
+    </svg>
+  )
+}
+
+export function IconHardDrive(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3.5 13.5 6.8 5a1.5 1.5 0 0 1 1.4-1h7.6a1.5 1.5 0 0 1 1.4 1l3.3 8.5" />
+      <rect x="3" y="13.5" width="18" height="6" rx="1.5" />
+      <circle cx="7" cy="16.5" r="0.9" fill="currentColor" stroke="none" />
+      <path d="M11 16.5h6" />
+    </svg>
+  )
+}
+
 export function IconSearch2(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>

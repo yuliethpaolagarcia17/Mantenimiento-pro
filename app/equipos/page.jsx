@@ -10,6 +10,7 @@ const FILTROS = [
   { value: 'operativo', label: 'Operativos' },
   { value: 'mantenimiento', label: 'En mantenimiento' },
   { value: 'fuera de servicio', label: 'Fuera de servicio' },
+  { value: 'retirado', label: 'Retirados' },
 ]
 
 const POR_PAGINA = 8
@@ -39,12 +40,14 @@ export default function Equipos() {
   function estadoBadge(estado) {
     if (estado === 'operativo') return 'badge-emerald'
     if (estado === 'mantenimiento') return 'badge-amber'
+    if (estado === 'retirado') return 'badge-slate'
     return 'badge-rose'
   }
 
   function estadoIconBg(estado) {
     if (estado === 'operativo') return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
     if (estado === 'mantenimiento') return 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400'
+    if (estado === 'retirado') return 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
     return 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
   }
 

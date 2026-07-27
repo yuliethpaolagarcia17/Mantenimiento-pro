@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, use } from 'react'
+import { useEffect, useRef, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { QRCodeCanvas } from 'qrcode.react'
@@ -21,6 +21,7 @@ export default function HojaVida({ params }) {
   const [actualizandoEstado, setActualizandoEstado] = useState(false)
   const [generandoPDF, setGenerandoPDF] = useState(false)
   const [rol, setRol] = useState('')
+  const qrRef = useRef(null)
 
   useEffect(() => {
     async function cargarPerfil() {
@@ -77,93 +78,14 @@ export default function HojaVida({ params }) {
   async function descargarPDF() {
     setGenerandoPDF(true)
     try {
-      const { jsPDF } = await import('jspdf')
-      const doc = new jsPDF()
-      const margen = 15
-      let y = 20
-
-      function salto(alto = 7) {
-        y += alto
-        if (y > 280) {
-          doc.addPage()
-          y = 20
-        }
+      const { generarPdfHojaVida } = await import('@/lib/pdfHojaVida')
+      let qrDataUrl
+      try {
+        qrDataUrl = qrRef.current?.toDataURL('image/png')
+      } catch (e) {
+        console.error('No se pudo capturar el código QR:', e)
       }
-      function titulo(texto) {
-        doc.setFontSize(13)
-        doc.setFont(undefined, 'bold')
-        doc.text(texto, margen, y)
-        doc.setFont(undefined, 'normal')
-        doc.setFontSize(10)
-        salto(8)
-      }
-      function fila(etiqueta, valor) {
-        doc.setTextColor(100)
-        doc.text(`${etiqueta}:`, margen, y)
-        doc.setTextColor(20)
-        doc.text(String(valor || 'No registrado'), margen + 45, y)
-        salto(6.5)
-      }
-
-      doc.setFontSize(17)
-      doc.setFont(undefined, 'bold')
-      doc.text('Hoja de vida del equipo', margen, y)
-      salto(9)
-      doc.setFontSize(11)
-      doc.setTextColor(80)
-      doc.text(equipo.nombre, margen, y)
-      doc.setTextColor(20)
-      salto(10)
-
-      titulo('Información general')
-      fila('Categoría', equipo.categoria)
-      fila('Marca', equipo.marca)
-      fila('Modelo', equipo.modelo)
-      fila('Serial', equipo.serial)
-      fila('Ubicación', equipo.ubicacion)
-      fila('Responsable', equipo.responsable)
-      fila('Estado', equipo.estado)
-      salto(4)
-
-      titulo('Especificaciones técnicas')
-      fila('RAM', equipo.ram)
-      fila('Sistema operativo', equipo.sistema_operativo)
-      fila('Disco', equipo.disco)
-      salto(4)
-
-      titulo('Compra y garantía')
-      fila('Fecha de compra', equipo.fecha_compra)
-      fila('Proveedor', equipo.proveedor)
-      fila('Garantía hasta', equipo.garantia_hasta)
-      fila('Costo de compra', equipo.costo_compra ? `$${equipo.costo_compra}` : '')
-      salto(4)
-
-      if (equipo.notas) {
-        titulo('Notas')
-        const lineas = doc.splitTextToSize(equipo.notas, 180)
-        doc.text(lineas, margen, y)
-        salto(lineas.length * 5.5 + 4)
-      }
-
-      titulo(`Historial de mantenimientos (${historial.length})`)
-      if (historial.length === 0) {
-        doc.setTextColor(100)
-        doc.text('Este equipo no tiene mantenimientos registrados.', margen, y)
-        doc.setTextColor(20)
-        salto(6.5)
-      } else {
-        historial.forEach(h => {
-          fila('Fecha', new Date(h.fecha).toLocaleDateString('es-CO'))
-          fila('Tipo', h.tipo)
-          fila('Técnico', h.tecnico)
-          if (h.descripcion) fila('Descripción', h.descripcion)
-          if (h.costo) fila('Costo', `$${h.costo}`)
-          doc.setDrawColor(220)
-          doc.line(margen, y - 2, 195, y - 2)
-          salto(3)
-        })
-      }
-
+      const doc = generarPdfHojaVida({ equipo, historial, qrDataUrl })
       doc.save(`hoja-de-vida-${equipo.nombre.replace(/\s+/g, '-').toLowerCase()}.pdf`)
     } catch (e) {
       console.error('Error generando PDF:', e)
@@ -302,7 +224,7 @@ export default function HojaVida({ params }) {
               Código QR
             </div>
             <div className="p-3 bg-white border border-slate-200 dark:border-slate-800 rounded-xl shrink-0 shadow-sm">
-              <QRCodeCanvas value={urlEquipo} size={150} />
+              <QRCodeCanvas ref={qrRef} value={urlEquipo} size={150} />
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-4">
               Escanéalo desde el celular para acceder de inmediato a esta hoja de vida, sin buscar papeles ni carpetas.

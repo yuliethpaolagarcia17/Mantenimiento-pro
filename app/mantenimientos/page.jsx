@@ -96,19 +96,22 @@ export default function Mantenimientos() {
     if (dias) {
       const siguiente = new Date()
       siguiente.setDate(siguiente.getDate() + dias)
+      const fechaSiguiente = siguiente.toISOString().split('T')[0]
       const { error } = await supabase.from('planes_mantenimiento')
-        .update({ proxima_fecha: siguiente.toISOString().split('T')[0] })
+        .update({ proxima_fecha: fechaSiguiente })
         .eq('id', plan.id)
       if (error) {
         alert('El mantenimiento quedó registrado, pero no se pudo reprogramar el plan: ' + error.message)
         return
       }
+      alert(`Mantenimiento completado y registrado en el historial.\nPróxima fecha programada: ${siguiente.toLocaleDateString('es-CO')}`)
     } else {
       const { error } = await supabase.from('planes_mantenimiento').update({ estado: 'completado' }).eq('id', plan.id)
       if (error) {
         alert('El mantenimiento quedó registrado, pero no se pudo cerrar el plan: ' + error.message)
         return
       }
+      alert('Mantenimiento completado y registrado en el historial. Este plan queda finalizado.')
     }
     cargarPlanes()
   }

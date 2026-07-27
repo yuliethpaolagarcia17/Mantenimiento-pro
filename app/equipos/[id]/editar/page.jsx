@@ -1,12 +1,13 @@
 'use client'
-import { useEffect, useState, use } from 'react'
+import { useEffect, useMemo, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { IconTag, IconShieldCheck, IconFileText, IconAlertTriangle, IconCpu } from '../../../components/Icons'
 import Campo from '../../../components/CampoFormulario'
+import CampoDesplegable from '../../../components/CampoDesplegable'
 import { ICONO_POR_CATEGORIA, IconCategoriaDefault } from '../../../components/CategoriaEquipo'
-import { CATEGORIAS_EQUIPO, UBICACIONES_EQUIPO } from '@/lib/constantes'
+import { CATEGORIAS_EQUIPO, UBICACIONES_EQUIPO, MARCAS_COMUNES, RAM_COMUNES, SISTEMAS_OPERATIVOS, DISCOS_COMUNES } from '@/lib/constantes'
 import { obtenerPerfilActual } from '@/lib/perfil'
 import { puedeEditar } from '@/lib/permisos'
 import AccesoRestringido from '../../../components/AccesoRestringido'
@@ -80,6 +81,11 @@ export default function EditarEquipo({ params }) {
     cargar()
     cargarSugerencias()
   }, [id])
+
+  const opcionesMarca = useMemo(() => [...new Set([...MARCAS_COMUNES, ...sugerencias.marca])].sort(), [sugerencias.marca])
+  const opcionesRam = useMemo(() => [...new Set([...RAM_COMUNES, ...sugerencias.ram])], [sugerencias.ram])
+  const opcionesSO = useMemo(() => [...new Set([...SISTEMAS_OPERATIVOS, ...sugerencias.sistema_operativo])], [sugerencias.sistema_operativo])
+  const opcionesDisco = useMemo(() => [...new Set([...DISCOS_COMUNES, ...sugerencias.disco])], [sugerencias.disco])
 
   function actualizar(campo, valor) {
     setForm({ ...form, [campo]: valor })
@@ -162,14 +168,14 @@ export default function EditarEquipo({ params }) {
               <option value="">Seleccionar categoría</option>
               {CATEGORIAS_EQUIPO.map(c => <option key={c} value={c}>{c}</option>)}
             </Campo>
-            <Campo etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} sugerencias={sugerencias.marca} />
-            <Campo etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} sugerencias={sugerencias.modelo} />
+            <CampoDesplegable etiqueta="Marca" valor={form.marca} onChange={(v) => actualizar('marca', v)} opciones={opcionesMarca} />
+            <CampoDesplegable etiqueta="Modelo" valor={form.modelo} onChange={(v) => actualizar('modelo', v)} opciones={sugerencias.modelo} />
             <Campo etiqueta="Serial" valor={form.serial} onChange={(v) => actualizar('serial', v)} />
             <Campo tipo="select" etiqueta="Ubicación" valor={form.ubicacion} onChange={(v) => actualizar('ubicacion', v)}>
               <option value="">Seleccionar ubicación</option>
               {UBICACIONES_EQUIPO.map(u => <option key={u} value={u}>{u}</option>)}
             </Campo>
-            <Campo etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} sugerencias={sugerencias.responsable} />
+            <CampoDesplegable etiqueta="Responsable" valor={form.responsable} onChange={(v) => actualizar('responsable', v)} opciones={sugerencias.responsable} />
             <Campo tipo="select" etiqueta="Estado" valor={form.estado} onChange={(v) => actualizar('estado', v)}>
               <option value="operativo">Operativo</option>
               <option value="mantenimiento">En mantenimiento</option>
@@ -185,9 +191,9 @@ export default function EditarEquipo({ params }) {
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Especificaciones técnicas</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Campo etiqueta="RAM" valor={form.ram} onChange={(v) => actualizar('ram', v)} sugerencias={sugerencias.ram} />
-            <Campo etiqueta="Sistema operativo" valor={form.sistema_operativo} onChange={(v) => actualizar('sistema_operativo', v)} sugerencias={sugerencias.sistema_operativo} />
-            <Campo etiqueta="Disco" valor={form.disco} onChange={(v) => actualizar('disco', v)} sugerencias={sugerencias.disco} />
+            <CampoDesplegable etiqueta="RAM" valor={form.ram} onChange={(v) => actualizar('ram', v)} opciones={opcionesRam} />
+            <CampoDesplegable etiqueta="Sistema operativo" valor={form.sistema_operativo} onChange={(v) => actualizar('sistema_operativo', v)} opciones={opcionesSO} />
+            <CampoDesplegable etiqueta="Disco" valor={form.disco} onChange={(v) => actualizar('disco', v)} opciones={opcionesDisco} />
           </div>
         </section>
 
@@ -198,7 +204,7 @@ export default function EditarEquipo({ params }) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Campo tipo="date" etiqueta="Fecha de compra" valor={form.fecha_compra} onChange={(v) => actualizar('fecha_compra', v)} />
-            <Campo etiqueta="Proveedor" valor={form.proveedor} onChange={(v) => actualizar('proveedor', v)} sugerencias={sugerencias.proveedor} />
+            <CampoDesplegable etiqueta="Proveedor" valor={form.proveedor} onChange={(v) => actualizar('proveedor', v)} opciones={sugerencias.proveedor} />
             <Campo tipo="date" etiqueta="Garantía hasta" valor={form.garantia_hasta} onChange={(v) => actualizar('garantia_hasta', v)} />
             <Campo tipo="number" etiqueta="Costo de compra" valor={form.costo_compra} onChange={(v) => actualizar('costo_compra', v)} />
           </div>
